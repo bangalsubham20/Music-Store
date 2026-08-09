@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎵 Music Store</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Toast Container -->
+  <div id="toast" class="toast-message" aria-live="polite"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">MusicStore</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+        data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+        aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" id="recentlyPlayedLink">Recently Played</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="genreDropdown" role="button" data-bs-toggle="dropdown"
+              aria-expanded="false">Genres</a>
+            <ul class="dropdown-menu" aria-labelledby="genreDropdown">
+              <li><a class="dropdown-item" href="#" data-genre="all">All Genres</a></li>
+              <li><a class="dropdown-item" href="#" data-genre="Pop">Pop</a></li>
+              <li><a class="dropdown-item" href="#" data-genre="Rock">Rock</a></li>
+              <li><a class="dropdown-item" href="#" data-genre="Jazz">Jazz</a></li>
+              <li><a class="dropdown-item" href="#" data-genre="Electronic">Electronic</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a class="nav-link" href="#" id="favoritesLink">Favorites</a></li>
+        </ul>
+        <form class="d-flex" id="searchForm">
+          <div class="input-group">
+            <input class="form-control me-2" type="search" placeholder="Search tracks..." aria-label="Search" id="searchInput" />
+            <button class="btn btn-outline-success" type="submit">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </form>
+        <div class="ms-3">
+          <button id="highContrastToggle" class="btn btn-outline-info btn-sm" title="High Contrast Mode">
+            <i class="fas fa-adjust"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Header with Parallax -->
+  <header class="parallax-header">
+    <div class="container position-relative">
+      <h1 class="display-5">🎧 Welcome to Music Store</h1>
+      <p class="lead">Stream and enjoy curated tracks from talented artists</p>
+      <button id="themeToggle" class="btn btn-outline-light theme-toggle-btn" aria-label="Toggle theme">
+        <span id="themeIcon">🌙</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container my-5">
+    <h2 class="section-title text-center mb-4">Featured Tracks</h2>
+
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <select id="genreFilter" class="form-select" aria-label="Filter by genre">
+          <option value="all">All Genres</option>
+          <option value="Pop">Pop</option>
+          <option value="Rock">Rock</option>
+          <option value="Jazz">Jazz</option>
+          <option value="Electronic">Electronic</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <select id="sortFilter" class="form-select" aria-label="Sort tracks">
+          <option value="default">Sort by</option>
+          <option value="title">Title (A-Z)</option>
+          <option value="artist">Artist (A-Z)</option>
+          <option value="popularity">Most Popular</option>
+          <option value="recent">Recently Added</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row g-4" id="cardContainer">
+      <!-- Skeleton loading -->
+      <div class="col-md-4 skeleton-card">
+        <div class="card h-100 shadow-sm">
+          <div class="skeleton-img"></div>
+          <div class="card-body">
+            <h5 class="skeleton-title"></h5>
+            <p class="skeleton-text"></p>
+            <div class="skeleton-audio"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Repeat skeleton cards as needed -->
+    </div>
+
+    <div class="text-center mt-4">
+      <button id="loadMore" class="btn btn-primary">Load More</button>
+    </div>
+  </main>
+
+  <!-- Global Player -->
+  <div id="globalPlayer" class="global-player">
+    <div class="player-container">
+      <div class="player-info">
+        <img id="nowPlayingArt" src="" alt="Now playing art" class="now-playing-art" />
+        <div>
+          <div id="nowPlayingTitle" class="now-playing-title"></div>
+          <div id="nowPlayingArtist" class="now-playing-artist"></div>
+        </div>
+      </div>
+      
+      <div class="player-controls">
+        <button id="prevBtn" class="btn btn-link" aria-label="Previous track">
+          <i class="fas fa-step-backward"></i>
+        </button>
+        <button id="playPauseBtn" class="btn btn-link" aria-label="Play/Pause">
+          <i class="fas fa-play"></i>
+        </button>
+        <button id="nextBtn" class="btn btn-link" aria-label="Next track">
+          <i class="fas fa-step-forward"></i>
+        </button>
+      </div>
+      
+      <div class="player-progress">
+        <div class="progress-time" id="currentTime">0:00</div>
+        <div class="progress-bar-container">
+          <input type="range" id="progressBar" class="progress-bar" min="0" max="100" value="0" aria-label="Track progress" />
+          <div class="waveform" id="waveform"></div>
+        </div>
+        <div class="progress-time" id="duration">0:00</div>
+      </div>
+      
+      <div class="player-extra">
+        <button id="volumeBtn" class="btn btn-link" aria-label="Mute/Unmute">
+          <i class="fas fa-volume-up"></i>
+        </button>
+        <input type="range" id="volumeControl" class="volume-control" min="0" max="100" value="80" aria-label="Volume control" />
+        <button id="queueBtn" class="btn btn-link" aria-label="Show queue">
+          <i class="fas fa-list"></i>
+        </button>
+        <button id="sleepTimerBtn" class="btn btn-link" aria-label="Sleep timer">
+          <i class="fas fa-clock"></i>
+        </button>
+        <button id="eqBtn" class="btn btn-link" aria-label="Equalizer">
+          <i class="fas fa-sliders-h"></i>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Queue Panel -->
+    <div id="queuePanel" class="queue-panel">
+      <div class="queue-header">
+        <h5>Playlist Queue</h5>
+        <button id="closeQueue" class="btn btn-link">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="queue-list" id="queueList"></div>
+    </div>
+    
+    <!-- Equalizer Panel -->
+    <div id="eqPanel" class="eq-panel">
+      <div class="eq-header">
+        <h5>Equalizer</h5>
+        <button id="closeEq" class="btn btn-link">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="eq-controls">
+        <div class="eq-band">
+          <label>Bass</label>
+          <input type="range" class="eq-range" min="-12" max="12" value="0" data-band="low" />
+        </div>
+        <div class="eq-band">
+          <label>Mid</label>
+          <input type="range" class="eq-range" min="-12" max="12" value="0" data-band="mid" />
+        </div>
+        <div class="eq-band">
+          <label>Treble</label>
+          <input type="range" class="eq-range" min="-12" max="12" value="0" data-band="high" />
+        </div>
+      </div>
+      <div class="eq-presets">
+        <button class="btn btn-sm btn-outline-secondary eq-preset" data-preset="flat">Flat</button>
+        <button class="btn btn-sm btn-outline-secondary eq-preset" data-preset="rock">Rock</button>
+        <button class="btn btn-sm btn-outline-secondary eq-preset" data-preset="pop">Pop</button>
+        <button class="btn btn-sm btn-outline-secondary eq-preset" data-preset="jazz">Jazz</button>
+      </div>
+    </div>
+    
+    <!-- Sleep Timer Panel -->
+    <div id="sleepTimerPanel" class="sleep-timer-panel">
+      <div class="sleep-timer-header">
+        <h5>Sleep Timer</h5>
+        <button id="closeSleepTimer" class="btn btn-link">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="sleep-timer-options">
+        <button class="btn btn-sm btn-outline-secondary timer-option" data-minutes="5">5 min</button>
+        <button class="btn btn-sm btn-outline-secondary timer-option" data-minutes="15">15 min</button>
+        <button class="btn btn-sm btn-outline-secondary timer-option" data-minutes="30">30 min</button>
+        <button class="btn btn-sm btn-outline-secondary timer-option" data-minutes="60">60 min</button>
+      </div>
+      <div class="custom-timer">
+        <input type="number" id="customTimer" class="form-control" min="1" max="120" placeholder="Custom minutes" />
+        <button id="setCustomTimer" class="btn btn-primary">Set</button>
+      </div>
+      <div class="timer-status" id="timerStatus"></div>
+    </div>
+  </div>
+
+  <!-- Comment Modal -->
+  <div class="modal fade" id="commentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="commentModalTitle">Comments</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="commentsContainer"></div>
+          <form id="commentForm">
+            <div class="mb-3">
+              <textarea class="form-control" id="commentText" placeholder="Add your comment..." required></textarea>
+            </div>
+            <div class="mb-3">
+              <input type="text" class="form-control" id="commentName" placeholder="Your name" required />
+            </div>
+            <button type="submit" class="btn btn-primary">Post Comment</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/wavesurfer.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
