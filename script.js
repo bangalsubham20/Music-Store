@@ -30,7 +30,6 @@ class DeluxeSaloonPlayer {
     this.loadComments();
     this.setupEventListeners();
     this.setupWaveform();
-    this.setInitialTheme();
     this.setupKeyboardShortcuts();
     this.initYouTubeApi();
     this.startLiveListenerSimulator();
@@ -60,11 +59,13 @@ class DeluxeSaloonPlayer {
 
   setupYouTubePlayer() {
     try {
+      this.playlistId = 'PLfJQluhwsUqsMa83FrBHxCqPwTnlr8YSO';
       this.ytPlayer = new YT.Player('ytPlayerContainer', {
         height: '100%',
         width: '100%',
-        videoId: 'jfKfPfyJRdk', // Initial Lofi track
         playerVars: {
+          listType: 'playlist',
+          list: this.playlistId,
           autoplay: 0,
           controls: 1,
           modestbranding: 1,
@@ -74,6 +75,7 @@ class DeluxeSaloonPlayer {
           onReady: () => {
             this.ytReady = true;
             this.ytPlayer.setVolume(this.volume);
+            this.updateNowPlayingFromYt();
           },
           onStateChange: (event) => {
             this.handleYtStateChange(event.data);
@@ -82,6 +84,26 @@ class DeluxeSaloonPlayer {
       });
     } catch (e) {
       console.warn('YouTube Player initialization fallback:', e);
+    }
+  }
+
+  updateNowPlayingFromYt() {
+    if (!this.ytReady || !this.ytPlayer || typeof this.ytPlayer.getVideoData !== 'function') return;
+    try {
+      const data = this.ytPlayer.getVideoData();
+      if (data && data.title) {
+        const titleEl = document.getElementById('nowPlayingTitle');
+        const artistEl = document.getElementById('nowPlayingArtist');
+        const artImg = document.getElementById('nowPlayingArt');
+
+        if (titleEl) titleEl.textContent = data.title;
+        if (artistEl) artistEl.textContent = data.author || 'Deluxe Saloon Playlist';
+        if (artImg && data.video_id) {
+          artImg.src = `https://img.youtube.com/vi/${data.video_id}/hqdefault.jpg`;
+        }
+      }
+    } catch (e) {
+      console.warn('Could not update now playing from YT:', e);
     }
   }
 
@@ -95,6 +117,7 @@ class DeluxeSaloonPlayer {
       playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
       globalPlayer.classList.add('is-playing');
       if (vinylRecord) vinylRecord.classList.add('is-spinning');
+      this.updateNowPlayingFromYt();
       this.startProgressTracker();
     } else if (state === YT.PlayerState.PAUSED || state === YT.PlayerState.ENDED) {
       this.isPlaying = false;
@@ -132,104 +155,10 @@ class DeluxeSaloonPlayer {
     }
   }
   
-  // Deluxe Saloon Track Dataset
+  // Deluxe Saloon Playlist Dataset
   loadTracks() {
-    this.tracks = [
-      { 
-        id: 1, 
-        title: "Lofi Hip Hop Radio - Beats to Relax", 
-        artist: "Lofi Girl", 
-        genre: "Electronic", 
-        youtubeId: "jfKfPfyJRdk",
-        duration: 240,
-        plays: 95400,
-        imageUrl: "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=600&q=80"
-      },
-      { 
-        id: 2, 
-        title: "Mujhse Mohabbat Ka Izhaar Karta", 
-        artist: "Satrang Music Official", 
-        genre: "Pop", 
-        youtubeId: "N0jnLZxYwYc",
-        duration: 275,
-        plays: 142000,
-        imageUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80"
-      },
-      { 
-        id: 3, 
-        title: "Cyberpunk Synthwave Beats", 
-        artist: "Lofi Girl", 
-        genre: "Electronic", 
-        youtubeId: "4xDzrJKXOOY",
-        duration: 310,
-        plays: 48200,
-        imageUrl: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=80"
-      },
-      { 
-        id: 4, 
-        title: "Smooth Jazz Cafe - Vintage BGM", 
-        artist: "Barber Shop BGM", 
-        genre: "Jazz", 
-        youtubeId: "Dx5qFacd3-E",
-        duration: 280,
-        plays: 62100,
-        imageUrl: "https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=600&q=80"
-      },
-      { 
-        id: 5, 
-        title: "Bohemian Rhapsody", 
-        artist: "Queen", 
-        genre: "Rock", 
-        youtubeId: "fJ9rUzIMcZQ",
-        duration: 359,
-        plays: 120000,
-        imageUrl: "https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?auto=format&fit=crop&w=600&q=80"
-      },
-      { 
-        id: 6, 
-        title: "Blinding Lights", 
-        artist: "The Weeknd", 
-        genre: "Pop", 
-        youtubeId: "4NRXx6U8ABQ",
-        duration: 200,
-        plays: 154000,
-        imageUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80"
-      },
-      { 
-        id: 7, 
-        title: "Faded", 
-        artist: "Alan Walker", 
-        genre: "Electronic", 
-        youtubeId: "60ItHLz5WEA",
-        duration: 212,
-        plays: 110000,
-        imageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80"
-      },
-      { 
-        id: 8, 
-        title: "Believer", 
-        artist: "Imagine Dragons", 
-        genre: "Rock", 
-        youtubeId: "7wtfhZwyrcc",
-        duration: 204,
-        plays: 98000,
-        imageUrl: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=600&q=80"
-      },
-      { 
-        id: 9, 
-        title: "Shape of You", 
-        artist: "Ed Sheeran", 
-        genre: "Pop", 
-        youtubeId: "JGwWNGJdvx8",
-        duration: 233,
-        plays: 175000,
-        imageUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80"
-      }
-    ];
-    
-    setTimeout(() => {
-      this.renderTracks();
-    }, 300);
+    this.tracks = [];
+  }
   }
   
   loadFavorites() {
@@ -259,7 +188,6 @@ class DeluxeSaloonPlayer {
   }
   
   setupEventListeners() {
-    document.getElementById('themeToggle').addEventListener('click', this.toggleTheme.bind(this));
     
     const genreFilter = document.getElementById('genreFilter');
     if (genreFilter) {
@@ -390,33 +318,7 @@ class DeluxeSaloonPlayer {
     });
   }
   
-  setInitialTheme() {
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    if (savedTheme === 'light' || (!savedTheme && !prefersDark)) {
-      document.body.classList.add('light-mode');
-      document.getElementById('themeIcon').textContent = '🌙';
-    } else {
-      document.getElementById('themeIcon').textContent = '☀️';
-    }
-  }
-  
-  toggleTheme() {
-    const body = document.body;
-    const icon = document.getElementById('themeIcon');
-    const isLight = body.classList.toggle('light-mode');
-    
-    if (isLight) {
-      localStorage.setItem('theme', 'light');
-      icon.textContent = '🌙';
-      this.showToast('Switched to Light Mode ☀️');
-    } else {
-      localStorage.setItem('theme', 'dark');
-      icon.textContent = '☀️';
-      this.showToast('Switched to Dark Mode 🌙');
-    }
-  }
+
   
   createTrackCardHtml(track) {
     const isFavorite = this.favorites.has(track.id.toString());
@@ -573,36 +475,8 @@ class DeluxeSaloonPlayer {
   }
   
   loadMoreTracks() {
-    this.showToast('Loading Deluxe Saloon tracks...');
-    
-    setTimeout(() => {
-      const newTracks = [
-        { 
-          id: 10, 
-          title: "Chillhop Barber Radio", 
-          artist: "Chillhop Music", 
-          genre: "Jazz", 
-          youtubeId: "7NOSDKb0HlU",
-          duration: 290,
-          plays: 87000,
-          imageUrl: "https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?auto=format&fit=crop&w=600&q=80"
-        },
-        { 
-          id: 11, 
-          title: "Synthesize Night Drive", 
-          artist: "Kavinsky", 
-          genre: "Electronic", 
-          youtubeId: "MV_3Dpw-BRY",
-          duration: 215,
-          plays: 64000,
-          imageUrl: "https://images.unsplash.com/photo-1511735111819-9a3f7709049c?auto=format&fit=crop&w=600&q=80"
-        }
-      ];
-      
-      this.tracks = [...this.tracks, ...newTracks];
-      this.renderTracks(document.getElementById('genreFilter')?.value || 'all');
-      this.showToast(`${newTracks.length} new Deluxe tracks loaded! 📀`);
-    }, 600);
+    this.tracks = [];
+  }
   }
   
   // Play Track & Rotate Vinyl Artwork
@@ -667,7 +541,9 @@ class DeluxeSaloonPlayer {
   }
   
   playNext() {
-    if (this.queue.length > 0) {
+    if (this.ytReady && this.ytPlayer && typeof this.ytPlayer.nextVideo === 'function') {
+      this.ytPlayer.nextVideo();
+    } else if (this.queue.length > 0) {
       const nextTrack = this.queue.shift();
       this.updateQueueDisplay();
       this.playTrack(nextTrack.id);
@@ -679,8 +555,8 @@ class DeluxeSaloonPlayer {
   }
   
   playPrevious() {
-    if (this.ytReady && this.ytPlayer && this.ytPlayer.getCurrentTime() > 3) {
-      this.ytPlayer.seekTo(0);
+    if (this.ytReady && this.ytPlayer && typeof this.ytPlayer.previousVideo === 'function') {
+      this.ytPlayer.previousVideo();
     } else if (this.currentTrack) {
       const currentIndex = this.tracks.findIndex(t => t.id === this.currentTrack.id);
       const prevIndex = (currentIndex - 1 + this.tracks.length) % this.tracks.length;

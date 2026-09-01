@@ -22,9 +22,6 @@
 
   <!-- Deluxe Saloon Fixed Vignette Hero Background -->
   <div class="saloon-bg-overlay"></div>
-  <div class="ambient-glow glow-1"></div>
-  <div class="ambient-glow glow-2"></div>
-
   <!-- Top Deluxe Saloon Navigation Bar -->
   <nav class="navbar navbar-expand-lg navbar-dark sticky-top glass-nav">
     <div class="container-fluid px-4 position-relative">
@@ -56,9 +53,9 @@
         </a>
         
         <!-- YT Music External Pill -->
-        <a href="https://music.youtube.com" target="_blank" rel="noopener" class="platform-pill ytmusic-pill text-decoration-none d-none d-sm-inline-flex align-items-center gap-2">
+        <a href="https://youtube.com/playlist?list=PLfJQluhwsUqsMa83FrBHxCqPwTnlr8YSO" target="_blank" rel="noopener" class="platform-pill ytmusic-pill text-decoration-none d-none d-sm-inline-flex align-items-center gap-2">
           <i class="fab fa-youtube text-danger fs-6"></i>
-          <span>YT Music</span>
+          <span>Playlist</span>
           <i class="fas fa-arrow-up-right-from-square small opacity-50"></i>
         </a>
 
@@ -74,11 +71,6 @@
           <li class="nav-item"><a class="nav-link active" href="#"><i class="fas fa-home me-1"></i> Home</a></li>
           <li class="nav-item"><a class="nav-link" href="#" id="recentlyPlayedLink"><i class="fas fa-history me-1"></i> Recent</a></li>
           <li class="nav-item"><a class="nav-link" href="#" id="favoritesLink"><i class="fas fa-heart me-1 text-danger"></i> Favorites</a></li>
-          <li class="nav-item">
-            <button id="themeToggle" class="btn btn-icon-glass ms-lg-2" title="Toggle Theme">
-              <span id="themeIcon">☀️</span>
-            </button>
-          </li>
         </ul>
       </div>
     </div>
@@ -210,29 +202,7 @@
     </div>
   </div>
 
-  <!-- Comments Modal -->
-  <div class="modal fade" id="commentModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content glass-modal border-0">
-        <div class="modal-header border-bottom-glass">
-          <h5 class="modal-title fw-bold" id="commentModalTitle"><i class="far fa-comments me-2"></i> Comments</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body p-4">
-          <div id="commentsContainer" class="comments-list mb-4"></div>
-          <form id="commentForm">
-            <div class="mb-3">
-              <input type="text" class="form-control custom-input mb-2" id="commentName" placeholder="Your Name" required />
-              <textarea class="form-control custom-input" id="commentText" rows="3" placeholder="Share your thoughts about this track..." required></textarea>
-            </div>
-            <button type="submit" class="btn btn-gradient w-100 py-2">
-              <i class="fas fa-paper-plane me-2"></i> Post Comment
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
+
 
   <!-- YouTube Iframe API -->
   <script src="https://www.youtube.com/iframe_api"></script>
