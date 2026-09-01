@@ -1,9 +1,14 @@
-// Main Application
-class MusicStore {
+// Deluxe Saloon — 90s Vinyl Music Player Application
+class DeluxeSaloonPlayer {
   constructor() {
     this.tracks = [];
     this.currentTrack = null;
-    this.audio = new Audio();
+    this.ytPlayer = null;
+    this.ytReady = false;
+    this.progressInterval = null;
+    this.listenerInterval = null;
+    this.liveCount = 32;
+    
     this.queue = [];
     this.favorites = new Set();
     this.recentlyPlayed = [];
@@ -12,13 +17,13 @@ class MusicStore {
     this.eqSettings = { low: 0, mid: 0, high: 0 };
     this.sleepTimer = null;
     this.isPlaying = false;
-    this.volume = 0.8;
+    this.volume = 80;
     this.muted = false;
     
     this.init();
   }
   
-  // Initialize the application
+  // Initialize Deluxe Saloon application
   init() {
     this.loadTracks();
     this.loadFavorites();
@@ -27,115 +32,206 @@ class MusicStore {
     this.setupWaveform();
     this.setInitialTheme();
     this.setupKeyboardShortcuts();
-    
-    // Audio event listeners
-    this.audio.addEventListener('timeupdate', this.updateProgress.bind(this));
-    this.audio.addEventListener('ended', this.playNext.bind(this));
-    this.audio.addEventListener('volumechange', this.updateVolumeUI.bind(this));
+    this.initYouTubeApi();
+    this.startLiveListenerSimulator();
+  }
+
+  // Live Listener Counter Simulation (Realistic 28 - 45 live listeners)
+  startLiveListenerSimulator() {
+    const countEl = document.getElementById('liveListenerCount');
+    if (!countEl) return;
+
+    this.listenerInterval = setInterval(() => {
+      const delta = Math.floor(Math.random() * 5) - 2; // -2 to +2 change
+      this.liveCount = Math.max(24, Math.min(48, this.liveCount + delta));
+      countEl.textContent = this.liveCount;
+    }, 6000);
+  }
+
+  // Initialize YouTube Iframe Player API
+  initYouTubeApi() {
+    const checkYt = setInterval(() => {
+      if (window.YT && window.YT.Player) {
+        clearInterval(checkYt);
+        this.setupYouTubePlayer();
+      }
+    }, 200);
+  }
+
+  setupYouTubePlayer() {
+    try {
+      this.ytPlayer = new YT.Player('ytPlayerContainer', {
+        height: '100%',
+        width: '100%',
+        videoId: 'jfKfPfyJRdk', // Initial Lofi track
+        playerVars: {
+          autoplay: 0,
+          controls: 1,
+          modestbranding: 1,
+          rel: 0
+        },
+        events: {
+          onReady: () => {
+            this.ytReady = true;
+            this.ytPlayer.setVolume(this.volume);
+          },
+          onStateChange: (event) => {
+            this.handleYtStateChange(event.data);
+          }
+        }
+      });
+    } catch (e) {
+      console.warn('YouTube Player initialization fallback:', e);
+    }
+  }
+
+  handleYtStateChange(state) {
+    const globalPlayer = document.getElementById('globalPlayer');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const vinylRecord = document.getElementById('vinylRecord');
+
+    if (state === YT.PlayerState.PLAYING) {
+      this.isPlaying = true;
+      playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+      globalPlayer.classList.add('is-playing');
+      if (vinylRecord) vinylRecord.classList.add('is-spinning');
+      this.startProgressTracker();
+    } else if (state === YT.PlayerState.PAUSED || state === YT.PlayerState.ENDED) {
+      this.isPlaying = false;
+      playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+      globalPlayer.classList.remove('is-playing');
+      if (vinylRecord) vinylRecord.classList.remove('is-spinning');
+      this.stopProgressTracker();
+
+      if (state === YT.PlayerState.ENDED) {
+        this.playNext();
+      }
+    }
+  }
+
+  startProgressTracker() {
+    this.stopProgressTracker();
+    this.progressInterval = setInterval(() => {
+      if (this.ytReady && this.ytPlayer && this.ytPlayer.getCurrentTime) {
+        const currentTime = this.ytPlayer.getCurrentTime() || 0;
+        const duration = this.ytPlayer.getDuration() || (this.currentTrack ? this.currentTrack.duration : 1);
+        
+        if (duration > 0) {
+          const percent = (currentTime / duration) * 100;
+          document.getElementById('progressBar').value = percent;
+          this.updateTimeDisplay(currentTime, duration);
+        }
+      }
+    }, 500);
+  }
+
+  stopProgressTracker() {
+    if (this.progressInterval) {
+      clearInterval(this.progressInterval);
+      this.progressInterval = null;
+    }
   }
   
-  // Load sample tracks
+  // Deluxe Saloon Track Dataset
   loadTracks() {
     this.tracks = [
       { 
         id: 1, 
-        title: "Dream Waves", 
-        artist: "Artist 1", 
-        genre: "Pop", 
-        duration: 183,
-        plays: 0,
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-        imageUrl: "https://source.unsplash.com/random/300x300/?pop"
+        title: "Lofi Hip Hop Radio - Beats to Relax", 
+        artist: "Lofi Girl", 
+        genre: "Electronic", 
+        youtubeId: "jfKfPfyJRdk",
+        duration: 240,
+        plays: 95400,
+        imageUrl: "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=600&q=80"
       },
       { 
         id: 2, 
-        title: "Neon City", 
-        artist: "Artist 2", 
-        genre: "Rock", 
-        duration: 215,
-        plays: 0,
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-        imageUrl: "https://source.unsplash.com/random/300x300/?rock"
+        title: "Mujhse Mohabbat Ka Izhaar Karta", 
+        artist: "Satrang Music Official", 
+        genre: "Pop", 
+        youtubeId: "N0jnLZxYwYc",
+        duration: 275,
+        plays: 142000,
+        imageUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80"
       },
       { 
         id: 3, 
-        title: "Velvet Nights", 
-        artist: "Artist 3", 
-        genre: "Jazz", 
-        duration: 247,
-        plays: 0,
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-        imageUrl: "https://source.unsplash.com/random/300x300/?jazz"
+        title: "Cyberpunk Synthwave Beats", 
+        artist: "Lofi Girl", 
+        genre: "Electronic", 
+        youtubeId: "4xDzrJKXOOY",
+        duration: 310,
+        plays: 48200,
+        imageUrl: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=80"
       },
       { 
         id: 4, 
-        title: "Skyline", 
-        artist: "Artist 4", 
-        genre: "Pop", 
-        duration: 195,
-        plays: 0,
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
-        imageUrl: "https://source.unsplash.com/random/300x300/?city"
+        title: "Smooth Jazz Cafe - Vintage BGM", 
+        artist: "Barber Shop BGM", 
+        genre: "Jazz", 
+        youtubeId: "Dx5qFacd3-E",
+        duration: 280,
+        plays: 62100,
+        imageUrl: "https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=600&q=80"
       },
       { 
         id: 5, 
-        title: "Echo Drive", 
-        artist: "Artist 5", 
+        title: "Bohemian Rhapsody", 
+        artist: "Queen", 
         genre: "Rock", 
-        duration: 231,
-        plays: 0,
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
-        imageUrl: "https://source.unsplash.com/random/300x300/?concert"
+        youtubeId: "fJ9rUzIMcZQ",
+        duration: 359,
+        plays: 120000,
+        imageUrl: "https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?auto=format&fit=crop&w=600&q=80"
       },
       { 
         id: 6, 
-        title: "Smooth Flow", 
-        artist: "Artist 6", 
-        genre: "Jazz", 
-        duration: 276,
-        plays: 0,
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
-        imageUrl: "https://source.unsplash.com/random/300x300/?saxophone"
+        title: "Blinding Lights", 
+        artist: "The Weeknd", 
+        genre: "Pop", 
+        youtubeId: "4NRXx6U8ABQ",
+        duration: 200,
+        plays: 154000,
+        imageUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80"
       },
       { 
         id: 7, 
-        title: "Firestorm", 
-        artist: "Artist 7", 
+        title: "Faded", 
+        artist: "Alan Walker", 
         genre: "Electronic", 
-        duration: 198,
-        plays: 0,
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3",
-        imageUrl: "https://source.unsplash.com/random/300x300/?electronic"
+        youtubeId: "60ItHLz5WEA",
+        duration: 212,
+        plays: 110000,
+        imageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80"
       },
       { 
         id: 8, 
-        title: "Crystal Rain", 
-        artist: "Artist 8", 
-        genre: "Pop", 
-        duration: 224,
-        plays: 0,
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
-        imageUrl: "https://source.unsplash.com/random/300x300/?rain"
+        title: "Believer", 
+        artist: "Imagine Dragons", 
+        genre: "Rock", 
+        youtubeId: "7wtfhZwyrcc",
+        duration: 204,
+        plays: 98000,
+        imageUrl: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=600&q=80"
       },
       { 
         id: 9, 
-        title: "Mellow Tune", 
-        artist: "Artist 9", 
-        genre: "Jazz", 
-        duration: 263,
-        plays: 0,
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3",
-        imageUrl: "https://source.unsplash.com/random/300x300/?jazz,night"
+        title: "Shape of You", 
+        artist: "Ed Sheeran", 
+        genre: "Pop", 
+        youtubeId: "JGwWNGJdvx8",
+        duration: 233,
+        plays: 175000,
+        imageUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80"
       }
     ];
     
-    // Render tracks after a slight delay to show skeleton loading
     setTimeout(() => {
       this.renderTracks();
-    }, 1000);
+    }, 300);
   }
   
-  // Load favorites from localStorage
   loadFavorites() {
     const savedFavorites = localStorage.getItem('favorites');
     if (savedFavorites) {
@@ -143,60 +239,59 @@ class MusicStore {
     }
   }
   
-  // Load comments from localStorage
   loadComments() {
     const savedComments = localStorage.getItem('comments');
     if (savedComments) {
       this.comments = JSON.parse(savedComments);
     } else {
-      // Initialize with some sample comments
       this.comments = {
         1: [
-          { id: 1, name: "MusicFan", text: "Love this track!", date: "2023-05-15T10:30:00" },
-          { id: 2, name: "AudioLover", text: "Perfect for my morning routine", date: "2023-05-16T08:15:00" }
-        ],
-        2: [
-          { id: 1, name: "RockEnthusiast", text: "Great energy in this one!", date: "2023-05-14T18:45:00" }
+          { id: 1, name: "SaloonListener", text: "Classic barber shop vinyl vibes!", date: "2024-05-15T10:30:00" },
+          { id: 2, name: "Nostalgia90s", text: "Nothing beats 90s vinyl playback.", date: "2024-05-16T08:15:00" }
         ]
       };
       this.saveComments();
     }
   }
   
-  // Save comments to localStorage
   saveComments() {
     localStorage.setItem('comments', JSON.stringify(this.comments));
   }
   
-  // Setup event listeners
   setupEventListeners() {
-    // Theme toggle
     document.getElementById('themeToggle').addEventListener('click', this.toggleTheme.bind(this));
     
-    // High contrast toggle
-    document.getElementById('highContrastToggle').addEventListener('click', this.toggleHighContrast.bind(this));
+    const genreFilter = document.getElementById('genreFilter');
+    if (genreFilter) {
+      genreFilter.addEventListener('change', (e) => {
+        this.renderTracks(e.target.value);
+      });
+    }
+
+    const sortFilter = document.getElementById('sortFilter');
+    if (sortFilter) {
+      sortFilter.addEventListener('change', (e) => {
+        this.sortTracks(e.target.value);
+      });
+    }
     
-    // Genre filter
-    document.getElementById('genreFilter').addEventListener('change', (e) => {
-      this.renderTracks(e.target.value);
-    });
+    const searchForm = document.getElementById('searchForm');
+    if (searchForm) {
+      searchForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) this.searchTracks(searchInput.value);
+      });
+    }
     
-    // Sort filter
-    document.getElementById('sortFilter').addEventListener('change', (e) => {
-      this.sortTracks(e.target.value);
-    });
-    
-    // Search functionality
-    document.getElementById('searchForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      this.searchTracks(document.getElementById('searchInput').value);
-    });
-    
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-      if (e.target.value === '') {
-        this.renderTracks();
-      }
-    });
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        if (e.target.value === '') {
+          this.renderTracks();
+        }
+      });
+    }
     
     // Player controls
     document.getElementById('playPauseBtn').addEventListener('click', this.togglePlayPause.bind(this));
@@ -206,13 +301,16 @@ class MusicStore {
     document.getElementById('volumeControl').addEventListener('input', this.setVolume.bind(this));
     document.getElementById('volumeBtn').addEventListener('click', this.toggleMute.bind(this));
     
-    // Queue controls
+    // Drawers
+    document.getElementById('ytModalBtn').addEventListener('click', this.toggleYtDrawer.bind(this));
+    document.getElementById('closeYtDrawer').addEventListener('click', this.toggleYtDrawer.bind(this));
+    
     document.getElementById('queueBtn').addEventListener('click', this.toggleQueue.bind(this));
     document.getElementById('closeQueue').addEventListener('click', this.toggleQueue.bind(this));
     
-    // Equalizer controls
     document.getElementById('eqBtn').addEventListener('click', this.toggleEq.bind(this));
     document.getElementById('closeEq').addEventListener('click', this.toggleEq.bind(this));
+    
     document.querySelectorAll('.eq-range').forEach(range => {
       range.addEventListener('input', (e) => {
         this.setEqBand(e.target.dataset.band, parseInt(e.target.value));
@@ -224,7 +322,6 @@ class MusicStore {
       });
     });
     
-    // Sleep timer controls
     document.getElementById('sleepTimerBtn').addEventListener('click', this.toggleSleepTimer.bind(this));
     document.getElementById('closeSleepTimer').addEventListener('click', this.toggleSleepTimer.bind(this));
     document.querySelectorAll('.timer-option').forEach(option => {
@@ -239,7 +336,6 @@ class MusicStore {
       }
     });
     
-    // Navigation links
     document.getElementById('favoritesLink').addEventListener('click', (e) => {
       e.preventDefault();
       this.showFavorites();
@@ -250,80 +346,50 @@ class MusicStore {
       this.showRecentlyPlayed();
     });
     
-    // Load more button
-    document.getElementById('loadMore').addEventListener('click', this.loadMoreTracks.bind(this));
+    const loadMore = document.getElementById('loadMore');
+    if (loadMore) {
+      loadMore.addEventListener('click', this.loadMoreTracks.bind(this));
+    }
   }
-  
-  // Setup waveform visualization
+
   setupWaveform() {
     this.waveform = WaveSurfer.create({
       container: '#waveform',
-      waveColor: '#4a6fa5',
-      progressColor: '#166088',
-      cursorColor: '#fff',
+      waveColor: 'rgba(255, 255, 255, 0.2)',
+      progressColor: '#ffffff',
+      cursorColor: '#80ced6',
       barWidth: 2,
       barRadius: 3,
       cursorWidth: 1,
-      height: 20,
+      height: 24,
       barGap: 2,
       responsive: true
     });
-    
-    this.waveform.on('ready', () => {
-      if (this.isPlaying) {
-        this.waveform.play();
-      }
-    });
-    
-    this.waveform.on('audioprocess', () => {
-      const progress = (this.waveform.getCurrentTime() / this.waveform.getDuration()) * 100;
-      document.getElementById('progressBar').value = progress;
-      this.updateTimeDisplay(this.waveform.getCurrentTime(), this.waveform.getDuration());
-    });
-    
-    this.waveform.on('seek', (progress) => {
-      document.getElementById('progressBar').value = progress * 100;
-      if (this.audio.src) {
-        this.audio.currentTime = this.audio.duration * progress;
-      }
-    });
-    
-    this.waveform.on('finish', () => {
-      this.playNext();
-    });
   }
   
-  // Setup keyboard shortcuts
   setupKeyboardShortcuts() {
     document.addEventListener('keydown', (e) => {
-      // Space for play/pause
-      if (e.code === 'Space' && !(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      if (e.code === 'Space') {
         e.preventDefault();
         this.togglePlayPause();
-      }
-      
-      // Left/Right arrows for seeking
-      if (e.code === 'ArrowLeft') {
+      } else if (e.code === 'ArrowLeft') {
         this.seekBackward();
       } else if (e.code === 'ArrowRight') {
         this.seekForward();
-      }
-      
-      // Up/Down arrows for volume
-      if (e.code === 'ArrowUp') {
+      } else if (e.code === 'ArrowUp') {
+        e.preventDefault();
         this.increaseVolume();
       } else if (e.code === 'ArrowDown') {
+        e.preventDefault();
         this.decreaseVolume();
-      }
-      
-      // M for mute
-      if (e.code === 'KeyM') {
+      } else if (e.code === 'KeyM') {
         this.toggleMute();
       }
     });
   }
   
-  // Set initial theme based on preferences
   setInitialTheme() {
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -334,14 +400,8 @@ class MusicStore {
     } else {
       document.getElementById('themeIcon').textContent = '☀️';
     }
-    
-    const highContrast = localStorage.getItem('highContrast') === 'true';
-    if (highContrast) {
-      document.body.classList.add('high-contrast');
-    }
   }
   
-  // Toggle dark/light theme
   toggleTheme() {
     const body = document.body;
     const icon = document.getElementById('themeIcon');
@@ -358,60 +418,51 @@ class MusicStore {
     }
   }
   
-  // Toggle high contrast mode
-  toggleHighContrast() {
-    const isHighContrast = document.body.classList.toggle('high-contrast');
-    localStorage.setItem('highContrast', isHighContrast);
-    this.showToast(isHighContrast ? 'High Contrast Mode On' : 'High Contrast Mode Off');
-  }
-  
-  // Render tracks based on filter
-  renderTracks(filter = 'all') {
-    const container = document.getElementById('cardContainer');
-    container.innerHTML = '';
-    
-    const filteredTracks = filter === 'all' 
-      ? this.tracks 
-      : this.tracks.filter(track => track.genre === filter);
-    
-    filteredTracks.forEach(track => {
-      const isFavorite = this.favorites.has(track.id.toString());
-      const isCurrent = this.currentTrack && this.currentTrack.id === track.id;
-      
-      const card = document.createElement('div');
-      card.className = `col-md-4 ${isCurrent ? 'current-playing' : ''}`;
-      card.innerHTML = `
-        <div class="card h-100 shadow-sm genre-${track.genre.toLowerCase()}">
-          <img src="${track.imageUrl}" class="card-img-top" alt="${track.artist}" />
-          <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-id="${track.id}" aria-label="${isFavorite ? 'Remove from favorites' : 'Add to favorites'}">
-            <i class="fas fa-heart"></i>
-          </button>
-          <div class="card-body">
-            <h5 class="card-title">${track.title}</h5>
-            <p class="card-text">${track.artist} — <em>${track.genre}</em></p>
-            <div class="d-flex justify-content-between align-items-center">
-              <small class="text-muted">${this.formatDuration(track.duration)}</small>
-              <small class="text-muted"><i class="fas fa-play"></i> ${track.plays}</small>
+  createTrackCardHtml(track) {
+    const isFavorite = this.favorites.has(track.id.toString());
+    const isCurrent = this.currentTrack && this.currentTrack.id === track.id;
+
+    return `
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100 glass-card ${isCurrent ? 'current-playing' : ''}">
+          <div class="card-img-wrapper">
+            <img src="${track.imageUrl}" class="card-img-top" alt="${track.artist}" loading="lazy" />
+            <div class="card-overlay">
+              <button class="btn-play-overlay play-btn" data-id="${track.id}" aria-label="Play ${track.title}">
+                <i class="fas ${isCurrent && this.isPlaying ? 'fa-pause' : 'fa-play'}"></i>
+              </button>
             </div>
-            <div class="mt-3 d-flex justify-content-between">
-              <button class="btn btn-sm btn-outline-primary play-btn" data-id="${track.id}">
-                <i class="fas fa-play"></i> Play
-              </button>
-              <button class="btn btn-sm btn-outline-secondary queue-btn" data-id="${track.id}">
-                <i class="fas fa-plus"></i> Queue
-              </button>
-              <button class="btn btn-sm btn-outline-info comment-btn" data-id="${track.id}" data-bs-toggle="modal" data-bs-target="#commentModal">
-                <i class="fas fa-comment"></i>
-              </button>
+            <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-id="${track.id}" aria-label="${isFavorite ? 'Remove favorite' : 'Add favorite'}">
+              <i class="fas fa-heart"></i>
+            </button>
+          </div>
+          <div class="card-body d-flex flex-column justify-content-between p-3">
+            <div>
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="genre-badge">${track.genre}</span>
+                <span class="badge bg-dark text-warning border border-warning small px-2 py-1"><i class="fas fa-record-vinyl me-1 ${isCurrent && this.isPlaying ? 'fa-spin' : ''}"></i> 90s Vinyl</span>
+              </div>
+              <h5 class="track-title">${track.title}</h5>
+              <p class="track-artist mb-3">${track.artist}</p>
+            </div>
+            <div class="d-flex align-items-center justify-content-between pt-2 border-top-glass">
+              <small class="text-white-50 fw-semibold"><i class="far fa-clock me-1"></i> ${this.formatDuration(track.duration)}</small>
+              <div class="d-flex gap-1">
+                <button class="btn btn-card-action queue-btn" data-id="${track.id}">
+                  <i class="fas fa-plus"></i> Queue
+                </button>
+                <button class="btn btn-card-action comment-btn" data-id="${track.id}" data-bs-toggle="modal" data-bs-target="#commentModal">
+                  <i class="far fa-comment"></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      `;
-      
-      container.appendChild(card);
-    });
-    
-    // Add event listeners to the new buttons
+      </div>
+    `;
+  }
+
+  attachCardListeners() {
     document.querySelectorAll('.play-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const trackId = parseInt(e.target.closest('.play-btn').dataset.id);
@@ -440,32 +491,35 @@ class MusicStore {
         this.showComments(trackId);
       });
     });
+  }
+
+  renderTracks(filter = 'all') {
+    const container = document.getElementById('cardContainer');
+    if (!container) return;
+    container.innerHTML = '';
     
-    // Initialize comment modal
-    const commentModal = document.getElementById('commentModal');
-    if (commentModal) {
-      commentModal.addEventListener('show.bs.modal', (e) => {
-        const button = e.relatedTarget;
-        const trackId = parseInt(button.getAttribute('data-id'));
-        this.showComments(trackId);
-      });
-      
-      document.getElementById('commentForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const trackId = parseInt(document.querySelector('.comment-btn[data-bs-target="#commentModal"]').dataset.id);
-        const text = document.getElementById('commentText').value;
-        const name = document.getElementById('commentName').value;
-        
-        if (text && name) {
-          this.addComment(trackId, name, text);
-          document.getElementById('commentText').value = '';
-          document.getElementById('commentName').value = '';
-        }
-      });
+    const filteredTracks = filter === 'all' 
+      ? this.tracks 
+      : this.tracks.filter(track => track.genre === filter);
+    
+    if (filteredTracks.length === 0) {
+      container.innerHTML = `
+        <div class="col-12 text-center py-5">
+          <i class="fas fa-compact-disc fa-3x text-white-50 mb-3"></i>
+          <h4>No Deluxe tracks found</h4>
+          <p class="text-muted">No tracks match the selected filter.</p>
+        </div>
+      `;
+      return;
     }
+
+    filteredTracks.forEach(track => {
+      container.insertAdjacentHTML('beforeend', this.createTrackCardHtml(track));
+    });
+    
+    this.attachCardListeners();
   }
   
-  // Sort tracks
   sortTracks(sortBy) {
     switch (sortBy) {
       case 'title':
@@ -477,19 +531,13 @@ class MusicStore {
       case 'popularity':
         this.tracks.sort((a, b) => b.plays - a.plays);
         break;
-      case 'recent':
-        // Assuming newer tracks have higher IDs
-        this.tracks.sort((a, b) => b.id - a.id);
-        break;
       default:
-        // Default sorting (original order)
         this.tracks.sort((a, b) => a.id - b.id);
     }
     
-    this.renderTracks(document.getElementById('genreFilter').value);
+    this.renderTracks(document.getElementById('genreFilter')?.value || 'all');
   }
   
-  // Search tracks
   searchTracks(query) {
     if (!query) {
       this.renderTracks();
@@ -504,124 +552,60 @@ class MusicStore {
     );
     
     const container = document.getElementById('cardContainer');
+    if (!container) return;
     container.innerHTML = '';
     
     if (filteredTracks.length === 0) {
       container.innerHTML = `
         <div class="col-12 text-center py-5">
-          <h4>No tracks found for "${query}"</h4>
-          <p>Try a different search term</p>
+          <i class="fas fa-search fa-3x text-white-50 mb-3"></i>
+          <h4>No Deluxe tracks found for "${query}"</h4>
         </div>
       `;
       return;
     }
     
     filteredTracks.forEach(track => {
-      const isFavorite = this.favorites.has(track.id.toString());
-      const isCurrent = this.currentTrack && this.currentTrack.id === track.id;
-      
-      const card = document.createElement('div');
-      card.className = `col-md-4 ${isCurrent ? 'current-playing' : ''}`;
-      card.innerHTML = `
-        <div class="card h-100 shadow-sm genre-${track.genre.toLowerCase()}">
-          <img src="${track.imageUrl}" class="card-img-top" alt="${track.artist}" />
-          <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-id="${track.id}">
-            <i class="fas fa-heart"></i>
-          </button>
-          <div class="card-body">
-            <h5 class="card-title">${track.title}</h5>
-            <p class="card-text">${track.artist} — <em>${track.genre}</em></p>
-            <div class="d-flex justify-content-between align-items-center">
-              <small class="text-muted">${this.formatDuration(track.duration)}</small>
-              <small class="text-muted"><i class="fas fa-play"></i> ${track.plays}</small>
-            </div>
-            <div class="mt-3 d-flex justify-content-between">
-              <button class="btn btn-sm btn-outline-primary play-btn" data-id="${track.id}">
-                <i class="fas fa-play"></i> Play
-              </button>
-              <button class="btn btn-sm btn-outline-secondary queue-btn" data-id="${track.id}">
-                <i class="fas fa-plus"></i> Queue
-              </button>
-              <button class="btn btn-sm btn-outline-info comment-btn" data-id="${track.id}" data-bs-toggle="modal" data-bs-target="#commentModal">
-                <i class="fas fa-comment"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-      
-      container.appendChild(card);
+      container.insertAdjacentHTML('beforeend', this.createTrackCardHtml(track));
     });
     
-    // Reattach event listeners
-    document.querySelectorAll('.play-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const trackId = parseInt(e.target.closest('.play-btn').dataset.id);
-        this.playTrack(trackId);
-      });
-    });
-    
-    document.querySelectorAll('.queue-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const trackId = parseInt(e.target.closest('.queue-btn').dataset.id);
-        this.addToQueue(trackId);
-      });
-    });
-    
-    document.querySelectorAll('.favorite-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const trackId = e.target.closest('.favorite-btn').dataset.id;
-        this.toggleFavorite(trackId);
-      });
-    });
+    this.attachCardListeners();
   }
   
-  // Load more tracks (simulated)
   loadMoreTracks() {
-    this.showToast('Loading more tracks...');
-    // Simulate loading
+    this.showToast('Loading Deluxe Saloon tracks...');
+    
     setTimeout(() => {
       const newTracks = [
         { 
           id: 10, 
-          title: "Ocean Breeze", 
-          artist: "Artist 10", 
-          genre: "Electronic", 
-          duration: 212,
-          plays: 0,
-          audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3",
-          imageUrl: "https://source.unsplash.com/random/300x300/?ocean"
+          title: "Chillhop Barber Radio", 
+          artist: "Chillhop Music", 
+          genre: "Jazz", 
+          youtubeId: "7NOSDKb0HlU",
+          duration: 290,
+          plays: 87000,
+          imageUrl: "https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?auto=format&fit=crop&w=600&q=80"
         },
         { 
           id: 11, 
-          title: "Mountain High", 
-          artist: "Artist 11", 
-          genre: "Rock", 
-          duration: 198,
-          plays: 0,
-          audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3",
-          imageUrl: "https://source.unsplash.com/random/300x300/?mountain"
-        },
-        { 
-          id: 12, 
-          title: "Urban Jungle", 
-          artist: "Artist 12", 
-          genre: "Pop", 
-          duration: 224,
-          plays: 0,
-          audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3",
-          imageUrl: "https://source.unsplash.com/random/300x300/?city,night"
+          title: "Synthesize Night Drive", 
+          artist: "Kavinsky", 
+          genre: "Electronic", 
+          youtubeId: "MV_3Dpw-BRY",
+          duration: 215,
+          plays: 64000,
+          imageUrl: "https://images.unsplash.com/photo-1511735111819-9a3f7709049c?auto=format&fit=crop&w=600&q=80"
         }
       ];
       
       this.tracks = [...this.tracks, ...newTracks];
-      this.renderTracks(document.getElementById('genreFilter').value);
-      this.showToast(`${newTracks.length} new tracks loaded`);
-    }, 1500);
+      this.renderTracks(document.getElementById('genreFilter')?.value || 'all');
+      this.showToast(`${newTracks.length} new Deluxe tracks loaded! 📀`);
+    }, 600);
   }
   
-  // Play a track
+  // Play Track & Rotate Vinyl Artwork
   playTrack(trackId) {
     const track = this.tracks.find(t => t.id === trackId);
     if (!track) return;
@@ -629,36 +613,24 @@ class MusicStore {
     this.currentTrack = track;
     track.plays++;
     
-    // Update UI
     document.getElementById('nowPlayingTitle').textContent = track.title;
     document.getElementById('nowPlayingArtist').textContent = track.artist;
     document.getElementById('nowPlayingArt').src = track.imageUrl;
     document.getElementById('duration').textContent = this.formatDuration(track.duration);
     
-    // Load audio
-    this.audio.src = track.audioUrl;
-    this.waveform.load(track.audioUrl);
+    const vinylRecord = document.getElementById('vinylRecord');
+    if (vinylRecord) vinylRecord.classList.add('is-spinning');
     
-    // Play
-    this.audio.play()
-      .then(() => {
-        this.isPlaying = true;
-        document.getElementById('playPauseBtn').innerHTML = '<i class="fas fa-pause"></i>';
-        this.showToast(`Now playing: ${track.title}`);
-        
-        // Add to recently played
-        this.addToRecentlyPlayed(track);
-        
-        // Highlight current track
-        this.renderTracks(document.getElementById('genreFilter').value);
-      })
-      .catch(error => {
-        console.error('Playback failed:', error);
-        this.showToast('Playback failed. Please try again.');
-      });
+    if (this.ytReady && this.ytPlayer && this.ytPlayer.loadVideoById) {
+      this.ytPlayer.loadVideoById(track.youtubeId);
+      this.ytPlayer.playVideo();
+    }
+    
+    this.showToast(`▶ Spinning Vinyl: ${track.title}`);
+    this.addToRecentlyPlayed(track);
+    this.renderTracks(document.getElementById('genreFilter')?.value || 'all');
   }
   
-  // Toggle play/pause
   togglePlayPause() {
     if (!this.currentTrack) {
       if (this.queue.length > 0) {
@@ -669,20 +641,31 @@ class MusicStore {
       return;
     }
     
-    if (this.isPlaying) {
-      this.audio.pause();
-      this.waveform.pause();
-      document.getElementById('playPauseBtn').innerHTML = '<i class="fas fa-play"></i>';
-      this.isPlaying = false;
+    if (this.ytReady && this.ytPlayer && typeof this.ytPlayer.playVideo === 'function') {
+      if (this.isPlaying) {
+        this.ytPlayer.pauseVideo();
+      } else {
+        this.ytPlayer.playVideo();
+      }
     } else {
-      this.audio.play();
-      this.waveform.play();
-      document.getElementById('playPauseBtn').innerHTML = '<i class="fas fa-pause"></i>';
-      this.isPlaying = true;
+      this.isPlaying = !this.isPlaying;
+      const playPauseBtn = document.getElementById('playPauseBtn');
+      const vinylRecord = document.getElementById('vinylRecord');
+      const globalPlayer = document.getElementById('globalPlayer');
+
+      if (this.isPlaying) {
+        if (playPauseBtn) playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        if (vinylRecord) vinylRecord.classList.add('is-spinning');
+        if (globalPlayer) globalPlayer.classList.add('is-playing');
+      } else {
+        if (playPauseBtn) playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+        if (vinylRecord) vinylRecord.classList.remove('is-spinning');
+        if (globalPlayer) globalPlayer.classList.remove('is-playing');
+      }
+      this.renderTracks(document.getElementById('genreFilter')?.value || 'all');
     }
   }
   
-  // Play next track in queue or list
   playNext() {
     if (this.queue.length > 0) {
       const nextTrack = this.queue.shift();
@@ -695,12 +678,9 @@ class MusicStore {
     }
   }
   
-  // Play previous track
   playPrevious() {
-    if (this.audio.currentTime > 3) {
-      // If more than 3 seconds into the track, restart it
-      this.audio.currentTime = 0;
-      this.waveform.seekTo(0);
+    if (this.ytReady && this.ytPlayer && this.ytPlayer.getCurrentTime() > 3) {
+      this.ytPlayer.seekTo(0);
     } else if (this.currentTrack) {
       const currentIndex = this.tracks.findIndex(t => t.id === this.currentTrack.id);
       const prevIndex = (currentIndex - 1 + this.tracks.length) % this.tracks.length;
@@ -708,7 +688,6 @@ class MusicStore {
     }
   }
   
-  // Add track to queue
   addToQueue(trackId) {
     const track = this.tracks.find(t => t.id === trackId);
     if (track) {
@@ -718,7 +697,6 @@ class MusicStore {
     }
   }
   
-  // Update queue display
   updateQueueDisplay() {
     const queueList = document.getElementById('queueList');
     queueList.innerHTML = '';
@@ -732,7 +710,7 @@ class MusicStore {
           <div class="queue-item-title">${track.title}</div>
           <div class="queue-item-artist">${track.artist}</div>
         </div>
-        <div class="queue-item-duration">${this.formatDuration(track.duration)}</div>
+        <div class="small text-white-50">${this.formatDuration(track.duration)}</div>
       `;
       
       queueItem.addEventListener('click', () => {
@@ -745,63 +723,70 @@ class MusicStore {
     });
     
     if (this.queue.length === 0) {
-      queueList.innerHTML = '<div class="text-center py-3">Queue is empty</div>';
+      queueList.innerHTML = '<div class="text-center py-4 text-white-50 small"><i class="fas fa-list-ul mb-2"></i><br>Queue is empty</div>';
     }
   }
   
-  // Toggle queue panel
+  // Drawer Toggles
+  toggleYtDrawer() {
+    document.getElementById('queuePanel').classList.remove('show');
+    document.getElementById('eqPanel').classList.remove('show');
+    document.getElementById('sleepTimerPanel').classList.remove('show');
+    document.getElementById('ytVideoDrawer').classList.toggle('show');
+  }
+
   toggleQueue() {
+    document.getElementById('ytVideoDrawer').classList.remove('show');
+    document.getElementById('eqPanel').classList.remove('show');
+    document.getElementById('sleepTimerPanel').classList.remove('show');
     document.getElementById('queuePanel').classList.toggle('show');
   }
   
-  // Toggle equalizer panel
   toggleEq() {
+    document.getElementById('ytVideoDrawer').classList.remove('show');
+    document.getElementById('queuePanel').classList.remove('show');
+    document.getElementById('sleepTimerPanel').classList.remove('show');
     document.getElementById('eqPanel').classList.toggle('show');
   }
-  
-  // Set equalizer band
-  setEqBand(band, value) {
-    this.eqSettings[band] = value;
-    // In a real app, this would apply to the audio context
-    console.log(`EQ ${band} set to ${value}dB`);
+
+  toggleSleepTimer() {
+    document.getElementById('ytVideoDrawer').classList.remove('show');
+    document.getElementById('queuePanel').classList.remove('show');
+    document.getElementById('eqPanel').classList.remove('show');
+    document.getElementById('sleepTimerPanel').classList.toggle('show');
   }
   
-  // Apply EQ preset
+  setEqBand(band, value) {
+    this.eqSettings[band] = value;
+    const valSpan = document.getElementById(`${band === 'low' ? 'bass' : band === 'mid' ? 'mid' : 'treble'}Val`);
+    if (valSpan) valSpan.textContent = `${value > 0 ? '+' : ''}${value}dB`;
+  }
+  
   applyEqPreset(preset) {
     switch (preset) {
-      case 'flat':
-        this.eqSettings = { low: 0, mid: 0, high: 0 };
-        break;
-      case 'rock':
-        this.eqSettings = { low: 6, mid: 3, high: 4 };
-        break;
-      case 'pop':
-        this.eqSettings = { low: 4, mid: 2, high: 5 };
-        break;
-      case 'jazz':
-        this.eqSettings = { low: 3, mid: 5, high: 2 };
-        break;
+      case 'flat': this.eqSettings = { low: 0, mid: 0, high: 0 }; break;
+      case 'rock': this.eqSettings = { low: 6, mid: 3, high: 4 }; break;
+      case 'pop': this.eqSettings = { low: 4, mid: 2, high: 5 }; break;
+      case 'jazz': this.eqSettings = { low: 3, mid: 5, high: 2 }; break;
     }
     
-    // Update slider positions
     document.querySelector('.eq-range[data-band="low"]').value = this.eqSettings.low;
     document.querySelector('.eq-range[data-band="mid"]').value = this.eqSettings.mid;
     document.querySelector('.eq-range[data-band="high"]').value = this.eqSettings.high;
     
-    this.showToast(`EQ preset applied: ${preset}`);
+    document.getElementById('bassVal').textContent = `${this.eqSettings.low > 0 ? '+' : ''}${this.eqSettings.low}dB`;
+    document.getElementById('midVal').textContent = `${this.eqSettings.mid > 0 ? '+' : ''}${this.eqSettings.mid}dB`;
+    document.getElementById('trebleVal').textContent = `${this.eqSettings.high > 0 ? '+' : ''}${this.eqSettings.high}dB`;
+
+    document.querySelectorAll('.eq-preset').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.preset === preset);
+    });
+    
+    this.showToast(`Equalizer preset: ${preset.toUpperCase()}`);
   }
   
-  // Toggle sleep timer panel
-  toggleSleepTimer() {
-    document.getElementById('sleepTimerPanel').classList.toggle('show');
-  }
-  
-  // Set sleep timer
   setSleepTimer(minutes) {
-    // Clear existing timer
-    if (this.sleepTimer) {
-      clearTimeout(this.sleepTimer);
-    }
+    if (this.sleepTimer) clearTimeout(this.sleepTimer);
     
     if (minutes <= 0) {
       document.getElementById('timerStatus').textContent = 'Sleep timer off';
@@ -811,331 +796,172 @@ class MusicStore {
     
     const ms = minutes * 60 * 1000;
     this.sleepTimer = setTimeout(() => {
-      this.audio.pause();
-      this.waveform.pause();
+      if (this.ytReady && this.ytPlayer) this.ytPlayer.pauseVideo();
       this.isPlaying = false;
       document.getElementById('playPauseBtn').innerHTML = '<i class="fas fa-play"></i>';
-      document.getElementById('timerStatus').textContent = 'Sleep timer off';
-      this.showToast('Sleep timer: Music stopped');
+      document.getElementById('globalPlayer').classList.remove('is-playing');
+      const vinylRecord = document.getElementById('vinylRecord');
+      if (vinylRecord) vinylRecord.classList.remove('is-spinning');
+      document.getElementById('timerStatus').textContent = 'Timer inactive';
+      this.showToast('😴 Sleep timer: Music stopped');
     }, ms);
     
     const endTime = new Date(Date.now() + ms);
-    document.getElementById('timerStatus').textContent = `Sleep timer set for ${endTime.toLocaleTimeString()}`;
-    this.showToast(`Sleep timer set for ${minutes} minute${minutes !== 1 ? 's' : ''}`);
+    document.getElementById('timerStatus').textContent = `Stops at ${endTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+    this.showToast(`Sleep timer set for ${minutes} min`);
   }
   
-  // Seek in track
   seek(e) {
     const percent = e.target.value;
-    const time = (percent / 100) * this.audio.duration;
-    this.audio.currentTime = time;
-    this.waveform.seekTo(percent / 100);
+    if (this.ytReady && this.ytPlayer && this.ytPlayer.getDuration) {
+      const duration = this.ytPlayer.getDuration();
+      if (duration > 0) {
+        this.ytPlayer.seekTo((percent / 100) * duration, true);
+      }
+    }
   }
   
-  // Seek backward 10 seconds
   seekBackward() {
-    if (!this.currentTrack) return;
-    this.audio.currentTime = Math.max(0, this.audio.currentTime - 10);
-    this.waveform.seekTo(this.audio.currentTime / this.audio.duration);
+    if (this.ytReady && this.ytPlayer && this.ytPlayer.getCurrentTime) {
+      this.ytPlayer.seekTo(Math.max(0, this.ytPlayer.getCurrentTime() - 10), true);
+    }
   }
   
-  // Seek forward 10 seconds
   seekForward() {
-    if (!this.currentTrack) return;
-    this.audio.currentTime = Math.min(this.audio.duration, this.audio.currentTime + 10);
-    this.waveform.seekTo(this.audio.currentTime / this.audio.duration);
+    if (this.ytReady && this.ytPlayer && this.ytPlayer.getCurrentTime) {
+      this.ytPlayer.seekTo(Math.min(this.ytPlayer.getDuration(), this.ytPlayer.getCurrentTime() + 10), true);
+    }
   }
   
-  // Set volume
   setVolume(e) {
-    this.volume = e.target.value / 100;
-    this.audio.volume = this.volume;
+    this.volume = parseInt(e.target.value);
+    if (this.ytReady && this.ytPlayer && this.ytPlayer.setVolume) {
+      this.ytPlayer.setVolume(this.volume);
+    }
     this.updateVolumeUI();
   }
   
-  // Increase volume
   increaseVolume() {
-    this.volume = Math.min(1, this.volume + 0.1);
-    this.audio.volume = this.volume;
-    document.getElementById('volumeControl').value = this.volume * 100;
+    this.volume = Math.min(100, this.volume + 10);
+    if (this.ytReady && this.ytPlayer) this.ytPlayer.setVolume(this.volume);
+    document.getElementById('volumeControl').value = this.volume;
     this.updateVolumeUI();
   }
   
-  // Decrease volume
   decreaseVolume() {
-    this.volume = Math.max(0, this.volume - 0.1);
-    this.audio.volume = this.volume;
-    document.getElementById('volumeControl').value = this.volume * 100;
+    this.volume = Math.max(0, this.volume - 10);
+    if (this.ytReady && this.ytPlayer) this.ytPlayer.setVolume(this.volume);
+    document.getElementById('volumeControl').value = this.volume;
     this.updateVolumeUI();
   }
   
-  // Toggle mute
   toggleMute() {
     this.muted = !this.muted;
-    this.audio.muted = this.muted;
+    if (this.ytReady && this.ytPlayer) {
+      if (this.muted) this.ytPlayer.mute();
+      else this.ytPlayer.unMute();
+    }
     this.updateVolumeUI();
-    this.showToast(this.muted ? 'Volume muted' : 'Volume unmuted');
+    this.showToast(this.muted ? 'Muted 🔇' : 'Unmuted 🔊');
   }
   
-  // Update volume UI
   updateVolumeUI() {
     const volumeBtn = document.getElementById('volumeBtn');
     const volumeControl = document.getElementById('volumeControl');
     
     if (this.muted) {
-      volumeBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+      volumeBtn.innerHTML = '<i class="fas fa-volume-mute text-danger"></i>';
       return;
     }
     
-    if (this.volume === 0) {
-      volumeBtn.innerHTML = '<i class="fas fa-volume-off"></i>';
-    } else if (this.volume < 0.5) {
-      volumeBtn.innerHTML = '<i class="fas fa-volume-down"></i>';
-    } else {
-      volumeBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
-    }
+    if (this.volume === 0) volumeBtn.innerHTML = '<i class="fas fa-volume-off"></i>';
+    else if (this.volume < 50) volumeBtn.innerHTML = '<i class="fas fa-volume-down"></i>';
+    else volumeBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
     
-    volumeControl.value = this.volume * 100;
+    volumeControl.value = this.volume;
   }
-  
-  // Update progress bar and time display
-  updateProgress() {
-    if (!this.currentTrack) return;
-    
-    const currentTime = this.audio.currentTime;
-    const duration = this.audio.duration;
-    
-    if (!isNaN(duration)) {
-      const percent = (currentTime / duration) * 100;
-      document.getElementById('progressBar').value = percent;
-      this.updateTimeDisplay(currentTime, duration);
-    }
-  }
-  
-  // Update time display
+
   updateTimeDisplay(currentTime, duration) {
     document.getElementById('currentTime').textContent = this.formatDuration(currentTime);
     document.getElementById('duration').textContent = this.formatDuration(duration);
   }
   
-  // Format duration (seconds to MM:SS)
   formatDuration(seconds) {
+    if (isNaN(seconds) || seconds < 0) return '0:00';
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   }
   
-  // Toggle favorite
   toggleFavorite(trackId) {
-    if (this.favorites.has(trackId)) {
-      this.favorites.delete(trackId);
+    const strId = trackId.toString();
+    if (this.favorites.has(strId)) {
+      this.favorites.delete(strId);
       this.showToast('Removed from favorites');
     } else {
-      this.favorites.add(trackId);
-      this.showToast('Added to favorites');
+      this.favorites.add(strId);
+      this.showToast('Added to favorites ❤️');
     }
     
-    // Update localStorage
     localStorage.setItem('favorites', JSON.stringify(Array.from(this.favorites)));
     
-    // Update UI
     const btn = document.querySelector(`.favorite-btn[data-id="${trackId}"]`);
-    if (btn) {
-      btn.classList.toggle('active');
-      btn.setAttribute('aria-label', btn.classList.contains('active') ? 'Remove from favorites' : 'Add to favorites');
-    }
+    if (btn) btn.classList.toggle('active');
   }
   
-  // Show favorites
   showFavorites() {
+    const container = document.getElementById('cardContainer');
+    container.innerHTML = '';
+
     if (this.favorites.size === 0) {
-      document.getElementById('cardContainer').innerHTML = `
+      container.innerHTML = `
         <div class="col-12 text-center py-5">
-          <h4>No favorites yet</h4>
-          <p>Click the heart icon on tracks to add them to favorites</p>
+          <i class="far fa-heart fa-3x text-white-50 mb-3"></i>
+          <h4>No favorite tracks saved</h4>
         </div>
       `;
       return;
     }
     
     const favoriteTracks = this.tracks.filter(track => this.favorites.has(track.id.toString()));
-    const container = document.getElementById('cardContainer');
-    container.innerHTML = '';
-    
     favoriteTracks.forEach(track => {
-      const isCurrent = this.currentTrack && this.currentTrack.id === track.id;
-      
-      const card = document.createElement('div');
-      card.className = `col-md-4 ${isCurrent ? 'current-playing' : ''}`;
-      card.innerHTML = `
-        <div class="card h-100 shadow-sm genre-${track.genre.toLowerCase()}">
-          <img src="${track.imageUrl}" class="card-img-top" alt="${track.artist}" />
-          <button class="favorite-btn active" data-id="${track.id}">
-            <i class="fas fa-heart"></i>
-          </button>
-          <div class="card-body">
-            <h5 class="card-title">${track.title}</h5>
-            <p class="card-text">${track.artist} — <em>${track.genre}</em></p>
-            <div class="d-flex justify-content-between align-items-center">
-              <small class="text-muted">${this.formatDuration(track.duration)}</small>
-              <small class="text-muted"><i class="fas fa-play"></i> ${track.plays}</small>
-            </div>
-            <div class="mt-3 d-flex justify-content-between">
-              <button class="btn btn-sm btn-outline-primary play-btn" data-id="${track.id}">
-                <i class="fas fa-play"></i> Play
-              </button>
-              <button class="btn btn-sm btn-outline-secondary queue-btn" data-id="${track.id}">
-                <i class="fas fa-plus"></i> Queue
-              </button>
-              <button class="btn btn-sm btn-outline-info comment-btn" data-id="${track.id}" data-bs-toggle="modal" data-bs-target="#commentModal">
-                <i class="fas fa-comment"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-      
-      container.appendChild(card);
+      container.insertAdjacentHTML('beforeend', this.createTrackCardHtml(track));
     });
     
-    // Reattach event listeners
-    document.querySelectorAll('.play-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const trackId = parseInt(e.target.closest('.play-btn').dataset.id);
-        this.playTrack(trackId);
-      });
-    });
-    
-    document.querySelectorAll('.queue-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const trackId = parseInt(e.target.closest('.queue-btn').dataset.id);
-        this.addToQueue(trackId);
-      });
-    });
-    
-    document.querySelectorAll('.favorite-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const trackId = e.target.closest('.favorite-btn').dataset.id;
-        this.toggleFavorite(trackId);
-      });
-    });
-    
-    document.querySelectorAll('.comment-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const trackId = parseInt(e.target.closest('.comment-btn').dataset.id);
-        this.showComments(trackId);
-      });
-    });
-    
-    this.showToast('Showing your favorite tracks');
+    this.attachCardListeners();
+    this.showToast('Showing your favorite tracks ❤️');
   }
   
-  // Add to recently played
   addToRecentlyPlayed(track) {
-    // Remove if already exists
     this.recentlyPlayed = this.recentlyPlayed.filter(t => t.id !== track.id);
-    
-    // Add to beginning
     this.recentlyPlayed.unshift(track);
-    
-    // Keep only last 10
-    if (this.recentlyPlayed.length > 10) {
-      this.recentlyPlayed.pop();
-    }
-    
-    // Save to localStorage
+    if (this.recentlyPlayed.length > 10) this.recentlyPlayed.pop();
     localStorage.setItem('recentlyPlayed', JSON.stringify(this.recentlyPlayed));
   }
   
-  // Show recently played
   showRecentlyPlayed() {
     const recentlyPlayed = JSON.parse(localStorage.getItem('recentlyPlayed') || '[]');
-    
+    const container = document.getElementById('cardContainer');
+    container.innerHTML = '';
+
     if (recentlyPlayed.length === 0) {
-      document.getElementById('cardContainer').innerHTML = `
+      container.innerHTML = `
         <div class="col-12 text-center py-5">
+          <i class="fas fa-history fa-3x text-white-50 mb-3"></i>
           <h4>No recently played tracks</h4>
-          <p>Play some tracks to see them here</p>
         </div>
       `;
       return;
     }
     
-    const container = document.getElementById('cardContainer');
-    container.innerHTML = '';
-    
     recentlyPlayed.forEach(track => {
-      const isFavorite = this.favorites.has(track.id.toString());
-      const isCurrent = this.currentTrack && this.currentTrack.id === track.id;
-      
-      const card = document.createElement('div');
-      card.className = `col-md-4 ${isCurrent ? 'current-playing' : ''}`;
-      card.innerHTML = `
-        <div class="card h-100 shadow-sm genre-${track.genre.toLowerCase()}">
-          <img src="${track.imageUrl}" class="card-img-top" alt="${track.artist}" />
-          <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-id="${track.id}">
-            <i class="fas fa-heart"></i>
-          </button>
-          <div class="card-body">
-            <h5 class="card-title">${track.title}</h5>
-            <p class="card-text">${track.artist} — <em>${track.genre}</em></p>
-            <div class="d-flex justify-content-between align-items-center">
-              <small class="text-muted">${this.formatDuration(track.duration)}</small>
-              <small class="text-muted"><i class="fas fa-play"></i> ${track.plays}</small>
-            </div>
-            <div class="mt-3 d-flex justify-content-between">
-              <button class="btn btn-sm btn-outline-primary play-btn" data-id="${track.id}">
-                <i class="fas fa-play"></i> Play
-              </button>
-              <button class="btn btn-sm btn-outline-secondary queue-btn" data-id="${track.id}">
-                <i class="fas fa-plus"></i> Queue
-              </button>
-              <button class="btn btn-sm btn-outline-info comment-btn" data-id="${track.id}" data-bs-toggle="modal" data-bs-target="#commentModal">
-                <i class="fas fa-comment"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-      
-      container.appendChild(card);
+      container.insertAdjacentHTML('beforeend', this.createTrackCardHtml(track));
     });
     
-    // Reattach event listeners
-    document.querySelectorAll('.play-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const trackId = parseInt(e.target.closest('.play-btn').dataset.id);
-        this.playTrack(trackId);
-      });
-    });
-    
-    document.querySelectorAll('.queue-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const trackId = parseInt(e.target.closest('.queue-btn').dataset.id);
-        this.addToQueue(trackId);
-      });
-    });
-    
-    document.querySelectorAll('.favorite-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const trackId = e.target.closest('.favorite-btn').dataset.id;
-        this.toggleFavorite(trackId);
-      });
-    });
-    
-    document.querySelectorAll('.comment-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const trackId = parseInt(e.target.closest('.comment-btn').dataset.id);
-        this.showComments(trackId);
-      });
-    });
-    
-    this.showToast('Showing your recently played tracks');
+    this.attachCardListeners();
+    this.showToast('Showing recently played tracks');
   }
   
-  // Show comments for a track
   showComments(trackId) {
     const commentsContainer = document.getElementById('commentsContainer');
     const modalTitle = document.getElementById('commentModalTitle');
@@ -1143,43 +969,42 @@ class MusicStore {
     
     if (!track) return;
     
-    modalTitle.textContent = `Comments for ${track.title}`;
+    modalTitle.innerHTML = `<i class="far fa-comments me-2"></i> Comments for "${track.title}"`;
     commentsContainer.innerHTML = '';
     
     if (!this.comments[trackId] || this.comments[trackId].length === 0) {
-      commentsContainer.innerHTML = '<p>No comments yet. Be the first to comment!</p>';
-      return;
+      commentsContainer.innerHTML = '<p class="text-white-50 small text-center py-3">No comments yet. Be the first to share your thoughts!</p>';
+    } else {
+      const sortedComments = [...this.comments[trackId]].sort((a, b) => new Date(b.date) - new Date(a.date));
+      sortedComments.forEach(comment => {
+        const commentElement = document.createElement('div');
+        commentElement.className = 'comment-item';
+        commentElement.innerHTML = `
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <div class="comment-author">${comment.name}</div>
+            <div class="comment-date">${new Date(comment.date).toLocaleDateString()}</div>
+          </div>
+          <div class="comment-text">${comment.text}</div>
+        `;
+        commentsContainer.appendChild(commentElement);
+      });
     }
-    
-    this.comments[trackId].sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    this.comments[trackId].forEach(comment => {
-      const commentElement = document.createElement('div');
-      commentElement.className = 'comment-item';
-      commentElement.innerHTML = `
-        <div class="comment-author">${comment.name}</div>
-        <div class="comment-text">${comment.text}</div>
-        <div class="comment-date">${new Date(comment.date).toLocaleString()}</div>
-      `;
-      commentsContainer.appendChild(commentElement);
-    });
-    
-    // Store the current track ID for when submitting a new comment
-    const commentButtons = document.querySelectorAll('.comment-btn');
-    commentButtons.forEach(btn => {
-      if (parseInt(btn.dataset.id) === trackId) {
-        btn.dataset.current = 'true';
-      } else {
-        btn.removeAttribute('data-current');
+
+    const commentForm = document.getElementById('commentForm');
+    commentForm.onsubmit = (e) => {
+      e.preventDefault();
+      const text = document.getElementById('commentText').value.trim();
+      const name = document.getElementById('commentName').value.trim();
+      if (text && name) {
+        this.addComment(trackId, name, text);
+        document.getElementById('commentText').value = '';
+        document.getElementById('commentName').value = '';
       }
-    });
+    };
   }
   
-  // Add a comment
   addComment(trackId, name, text) {
-    if (!this.comments[trackId]) {
-      this.comments[trackId] = [];
-    }
+    if (!this.comments[trackId]) this.comments[trackId] = [];
     
     const newComment = {
       id: this.comments[trackId].length + 1,
@@ -1191,22 +1016,25 @@ class MusicStore {
     this.comments[trackId].push(newComment);
     this.saveComments();
     this.showComments(trackId);
-    this.showToast('Comment added!');
+    this.showToast('Comment posted! 💬');
   }
   
-  // Show toast message
   showToast(message) {
     const toast = document.getElementById('toast');
     toast.textContent = message;
     toast.classList.add('show');
-    
-    setTimeout(() => {
-      toast.classList.remove('show');
-    }, 3000);
+    setTimeout(() => { toast.classList.remove('show'); }, 2800);
   }
 }
 
-// Initialize the application when DOM is loaded
+// Global YouTube Iframe hook
+window.onYouTubeIframeAPIReady = function() {
+  if (window.saloonPlayerApp) {
+    window.saloonPlayerApp.setupYouTubePlayer();
+  }
+};
+
+// Launch Deluxe Saloon app on DOM load
 document.addEventListener('DOMContentLoaded', () => {
-  const musicStore = new MusicStore();
+  window.saloonPlayerApp = new DeluxeSaloonPlayer();
 });
