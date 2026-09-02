@@ -159,7 +159,6 @@ class DeluxeSaloonPlayer {
   loadTracks() {
     this.tracks = [];
   }
-  }
   
   loadFavorites() {
     const savedFavorites = localStorage.getItem('favorites');
@@ -476,7 +475,6 @@ class DeluxeSaloonPlayer {
   
   loadMoreTracks() {
     this.tracks = [];
-  }
   }
   
   // Play Track & Rotate Vinyl Artwork
