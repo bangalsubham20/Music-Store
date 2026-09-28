@@ -2,213 +2,479 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Deluxe Saloon — 90s Vinyl Music Player</title>
-  <!-- Google Fonts -->
+  <title>Deluxe Saloon — Hi-Fi 90s Vinyl & Music Studio</title>
+  
+  <!-- Modern Geometric & Hi-Fi Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  
   <!-- Custom Stylesheet -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body class="deluxe-saloon-body">
-  <!-- Toast Notification Container -->
-  <div id="toast" class="toast-message" aria-live="polite"></div>
 
-  <!-- Deluxe Saloon Fixed Vignette Hero Background -->
-  <div class="saloon-bg-overlay"></div>
-  <!-- Top Deluxe Saloon Navigation Bar -->
-  <nav class="navbar navbar-expand-lg navbar-dark sticky-top glass-nav">
-    <div class="container-fluid px-4 position-relative">
-      <!-- Brand Logo Left -->
-      <a class="navbar-brand d-flex align-items-center gap-2" href="#">
-        <div class="brand-icon">
-          <i class="fas fa-record-vinyl text-white fs-5"></i>
+  <!-- Ambient Minimal Studio Background Glows -->
+  <div class="ambient-mesh">
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast-notification" aria-live="polite"></div>
+
+  <!-- Top Minimalist Hi-Fi Navigation Bar -->
+  <nav class="navbar navbar-expand-lg glass-nav sticky-top">
+    <div class="container-fluid px-3 px-lg-4">
+      
+      <!-- Brand & Studio Mark -->
+      <a class="navbar-brand d-flex align-items-center gap-3" href="#" id="brandHomeLink">
+        <div class="brand-turntable-icon">
+          <div class="mini-vinyl-badge">
+            <span class="mini-vinyl-center"></span>
+          </div>
         </div>
-        <span class="brand-text">Deluxe<span class="brand-highlight">Saloon</span></span>
+        <div class="brand-meta">
+          <span class="brand-title">DELUXE<span class="brand-sub">SALOON</span></span>
+          <span class="brand-tagline">HI-FI VINYL ARCHIVE</span>
+        </div>
       </a>
 
-      <!-- Center Live Listener Counter Pill -->
-      <div class="live-pill mx-auto d-none d-md-flex align-items-center gap-2">
-        <span class="live-dot-wrapper">
-          <span class="live-dot-ping"></span>
-          <span class="live-dot"></span>
-        </span>
-        <span id="liveListenerCount" class="fw-semibold">32</span>
-        <span class="text-white-50 small">listening live</span>
+      <!-- Quick Search Bar -->
+      <div class="nav-search-wrapper d-none d-md-flex align-items-center ms-lg-4 me-auto">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search tracks, artists, genres..." autocomplete="off" />
+        <button id="clearSearchBtn" class="search-clear-btn d-none" aria-label="Clear search">
+          <i class="fas fa-times"></i>
+        </button>
+        <span class="search-shortcut">⌘K</span>
       </div>
 
-      <!-- Right Action & External Platform Pills -->
-      <div class="d-flex align-items-center gap-2">
-        <!-- Spotify External Pill -->
-        <a href="https://open.spotify.com" target="_blank" rel="noopener" class="platform-pill spotify-pill text-decoration-none d-none d-sm-inline-flex align-items-center gap-2">
-          <i class="fab fa-spotify text-success fs-6"></i>
-          <span>Spotify</span>
-          <i class="fas fa-arrow-up-right-from-square small opacity-50"></i>
-        </a>
+      <!-- Navigation Tabs & Right Utilities -->
+      <div class="d-flex align-items-center gap-2 gap-lg-3 ms-auto">
         
-        <!-- YT Music External Pill -->
-        <a href="https://youtube.com/playlist?list=PLfJQluhwsUqsMa83FrBHxCqPwTnlr8YSO" target="_blank" rel="noopener" class="platform-pill ytmusic-pill text-decoration-none d-none d-sm-inline-flex align-items-center gap-2">
-          <i class="fab fa-youtube text-danger fs-6"></i>
-          <span>Playlist</span>
-          <i class="fas fa-arrow-up-right-from-square small opacity-50"></i>
-        </a>
+        <!-- View Navigation Tabs -->
+        <ul class="nav nav-pills custom-nav-pills d-none d-lg-flex">
+          <li class="nav-item">
+            <button class="nav-link active" id="tabAll">
+              <i class="fas fa-record-vinyl me-1"></i> Library
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" id="tabFavorites">
+              <i class="fas fa-heart me-1"></i> Favorites <span class="badge-count" id="favoritesCount">0</span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" id="tabRecent">
+              <i class="fas fa-history me-1"></i> History
+            </button>
+          </li>
+        </ul>
 
-        <!-- Mobile Toggler -->
-        <button class="navbar-toggler border-0 ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#saloonNav">
-          <span class="navbar-toggler-icon"></span>
+        <!-- Live Listener Counter Pill -->
+        <div class="live-status-pill d-none d-sm-flex align-items-center gap-2">
+          <span class="live-dot-beacon"></span>
+          <span id="liveListenerCount" class="live-number">38</span>
+          <span class="live-label">LIVE</span>
+        </div>
+
+        <!-- External Stream Badges -->
+        <div class="d-none d-xl-flex align-items-center gap-2">
+          <a href="https://open.spotify.com" target="_blank" rel="noopener noreferrer" class="social-pill spotify-pill" title="Listen on Spotify">
+            <i class="fab fa-spotify"></i>
+            <span>Spotify</span>
+          </a>
+          <a href="https://youtube.com/playlist?list=PLfJQluhwsUqsMa83FrBHxCqPwTnlr8YSO" target="_blank" rel="noopener noreferrer" class="social-pill yt-pill" title="YouTube Playlist">
+            <i class="fab fa-youtube"></i>
+            <span>Playlist</span>
+          </a>
+        </div>
+
+        <!-- Mobile Menu Toggle Button -->
+        <button class="btn-mobile-menu d-lg-none" type="button" id="mobileMenuBtn" aria-label="Toggle navigation">
+          <i class="fas fa-bars"></i>
         </button>
       </div>
 
-      <!-- Collapsible Navigation -->
-      <div class="collapse navbar-collapse" id="saloonNav">
-        <ul class="navbar-nav ms-auto my-2 my-lg-0 gap-1 align-items-lg-center">
-          <li class="nav-item"><a class="nav-link active" href="#"><i class="fas fa-home me-1"></i> Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="#" id="recentlyPlayedLink"><i class="fas fa-history me-1"></i> Recent</a></li>
-          <li class="nav-item"><a class="nav-link" href="#" id="favoritesLink"><i class="fas fa-heart me-1 text-danger"></i> Favorites</a></li>
-        </ul>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div class="mobile-nav-collapse d-lg-none" id="mobileNavCollapse">
+      <div class="mobile-search mb-3">
+        <input type="text" id="mobileSearchInput" class="search-input w-100" placeholder="Search collection..." />
+      </div>
+      <div class="d-flex flex-column gap-2">
+        <button class="mobile-nav-link active" id="mobileTabAll"><i class="fas fa-record-vinyl me-2"></i> Library</button>
+        <button class="mobile-nav-link" id="mobileTabFavorites"><i class="fas fa-heart me-2"></i> Favorites (<span id="mobileFavCount">0</span>)</button>
+        <button class="mobile-nav-link" id="mobileTabRecent"><i class="fas fa-history me-2"></i> History</button>
       </div>
     </div>
   </nav>
 
+  <!-- Main Studio Workspace Container -->
+  <main class="container-xxl py-4 py-lg-5">
+    <div class="row g-4 g-xl-5 align-items-start">
+      
+      <!-- LEFT COLUMN: The Minimalist Vinyl Turntable Studio Deck -->
+      <aside class="col-12 col-lg-5 col-xl-4 sticky-turntable-col">
+        <div class="turntable-deck-card glass-panel">
+          
+          <!-- Turntable Deck Top Header -->
+          <div class="deck-top-bar d-flex align-items-center justify-content-between mb-3">
+            <div class="d-flex align-items-center gap-2">
+              <span class="status-indicator-lamp" id="powerLamp"></span>
+              <span class="deck-brand-stamp">STUDIO MK-II</span>
+            </div>
+            <div class="deck-speed-pills">
+              <button class="speed-pill active" id="rpm33Btn">33 RPM</button>
+              <button class="speed-pill" id="rpm45Btn">45 RPM</button>
+            </div>
+          </div>
 
+          <!-- Turntable Platter & Physical Tonearm Stage -->
+          <div class="turntable-stage" id="turntableStage">
+            
+            <!-- Metallic Brushed Turntable Platter Base -->
+            <div class="platter-base">
+              
+              <!-- Spinning Vinyl Disc -->
+              <div class="vinyl-disc" id="vinylDisc">
+                <div class="vinyl-groove groove-outer"></div>
+                <div class="vinyl-groove groove-middle"></div>
+                <div class="vinyl-groove groove-inner"></div>
+                <div class="vinyl-shine"></div>
+                
+                <!-- Center Album Art Label -->
+                <div class="vinyl-center-label" id="vinylCenterLabel">
+                  <img id="vinylCenterImg" src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=80" alt="Vinyl record label" />
+                  <div class="center-spindle-hole"></div>
+                </div>
+              </div>
 
+            </div>
 
+            <!-- Authentic Mechanical Tonearm Assembly -->
+            <div class="tonearm-assembly" id="tonearmAssembly">
+              <div class="tonearm-pivot-base">
+                <div class="counterweight"></div>
+              </div>
+              <div class="tonearm-rod">
+                <div class="tonearm-bend"></div>
+              </div>
+              <div class="cartridge-headshell">
+                <div class="stylus-indicator"></div>
+              </div>
+            </div>
 
-  <!-- Deluxe Saloon Floating Vinyl Dock Player -->
+          </div>
+
+          <!-- Real-Time Audio Waveform Canvas Visualizer -->
+          <div class="visualizer-wrapper mt-3">
+            <canvas id="visualizerCanvas" height="42" width="320"></canvas>
+          </div>
+
+          <!-- Now-Playing Track Details -->
+          <div class="now-playing-meta mt-3 text-center">
+            <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
+              <span class="badge-audiophile" id="deckAudioQuality">
+                <i class="fas fa-gem me-1 text-warning"></i> 24-BIT / 96kHz VINYL CUT
+              </span>
+              <span class="genre-tag-pill" id="deckGenre">90s Lounge</span>
+            </div>
+            <h3 class="track-hero-title text-truncate" id="deckTrackTitle">Select a Track</h3>
+            <p class="track-hero-artist text-truncate" id="deckTrackArtist">Deluxe Saloon Collection</p>
+          </div>
+
+          <!-- Deck Quick Transport & Audio Controls -->
+          <div class="deck-controls d-flex align-items-center justify-content-center gap-3 mt-3">
+            <button class="btn-deck-utility" id="deckShuffleBtn" title="Shuffle Mode">
+              <i class="fas fa-shuffle"></i>
+            </button>
+            <button class="btn-deck-transport" id="deckPrevBtn" title="Previous (Left Arrow)">
+              <i class="fas fa-backward-step"></i>
+            </button>
+            <button class="btn-deck-play" id="deckPlayBtn" title="Play / Pause (Spacebar)">
+              <i class="fas fa-play" id="deckPlayIcon"></i>
+            </button>
+            <button class="btn-deck-transport" id="deckNextBtn" title="Next (Right Arrow)">
+              <i class="fas fa-forward-step"></i>
+            </button>
+            <button class="btn-deck-utility" id="deckFavBtn" title="Add to Favorites">
+              <i class="far fa-heart" id="deckFavIcon"></i>
+            </button>
+          </div>
+
+          <!-- Vinyl Crackle Audio Ambience Slider/Toggle -->
+          <div class="vinyl-crackle-box mt-3 d-flex align-items-center justify-content-between p-2 rounded-3">
+            <div class="d-flex align-items-center gap-2">
+              <i class="fas fa-compact-disc text-warning"></i>
+              <span class="crackle-label">Analog Vinyl Crackle</span>
+            </div>
+            <div class="form-check form-switch m-0">
+              <input class="form-check-input custom-switch" type="checkbox" id="vinylCrackleSwitch" />
+            </div>
+          </div>
+
+        </div>
+      </aside>
+
+      <!-- RIGHT COLUMN: Music Store, Catalog & Playlists -->
+      <section class="col-12 col-lg-7 col-xl-8">
+        
+        <!-- Header & Library Status Bar -->
+        <div class="library-header glass-panel p-3 p-md-4 mb-4">
+          <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+            <div>
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="section-kicker">CURATED RELEASES</span>
+                <span class="badge-total-tracks" id="totalTracksBadge">12 Tracks</span>
+              </div>
+              <h2 class="library-title m-0" id="librarySectionTitle">Vinyl Master Vault</h2>
+            </div>
+
+            <!-- View Layout Switcher (Grid vs List) -->
+            <div class="view-mode-toggle d-flex align-items-center">
+              <button class="btn-view-mode active" id="viewGridBtn" title="Grid View">
+                <i class="fas fa-grip"></i>
+              </button>
+              <button class="btn-view-mode" id="viewListBtn" title="List View">
+                <i class="fas fa-list"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Filter & Sort Toolbar -->
+          <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 pt-3 border-top-glass">
+            
+            <!-- Genre Category Pills -->
+            <div class="genre-pill-group d-flex flex-wrap gap-2" id="genreFilterGroup">
+              <button class="genre-filter-pill active" data-genre="all">All</button>
+              <button class="genre-filter-pill" data-genre="Pop">Pop</button>
+              <button class="genre-filter-pill" data-genre="Rock">Rock</button>
+              <button class="genre-filter-pill" data-genre="Jazz">Jazz & Soul</button>
+              <button class="genre-filter-pill" data-genre="Electronic">Electronic</button>
+              <button class="genre-filter-pill" data-genre="Synthwave">Synthwave</button>
+              <button class="genre-filter-pill" data-genre="Hip Hop">Hip Hop</button>
+            </div>
+
+            <!-- Sort By Select Dropdown -->
+            <div class="sort-select-wrapper ms-auto">
+              <select id="sortSelect" class="form-select custom-select-sm" aria-label="Sort tracks">
+                <option value="default">Default Order</option>
+                <option value="popularity">Most Played</option>
+                <option value="title">Title (A-Z)</option>
+                <option value="artist">Artist (A-Z)</option>
+                <option value="year">Release Year</option>
+              </select>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Track Cards / List Container -->
+        <div class="track-collection-container row g-3 g-md-4" id="cardContainer">
+          <!-- Dynamic track cards populated via JavaScript -->
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <!-- Deluxe Saloon Floating Hi-Fi Dock Player -->
   <div id="globalPlayer" class="global-player glass-player saloon-dock">
     <div class="player-container">
       
-      <!-- Left: Spinning Vinyl Record Cover Artwork -->
-      <div class="player-info">
-        <div class="vinyl-art-container" id="vinylContainer">
-          <div class="vinyl-record" id="vinylRecord">
-            <img id="nowPlayingArt" src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=150&q=80" alt="Spinning vinyl cover art" class="now-playing-art" />
-            <div class="vinyl-center-hole"></div>
+      <!-- Left: Mini Vinyl Artwork & Info -->
+      <div class="player-info d-flex align-items-center">
+        <div class="dock-vinyl-thumb-wrap">
+          <div class="dock-vinyl-disc" id="dockVinylMini">
+            <img id="nowPlayingArt" src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=150&q=80" alt="Spinning mini album artwork" class="now-playing-art" />
+            <div class="dock-vinyl-hole"></div>
           </div>
         </div>
-        <div class="track-meta ms-2">
-          <div id="nowPlayingTitle" class="now-playing-title fw-bold">Select a Deluxe Track</div>
-          <div id="nowPlayingArtist" class="now-playing-artist text-white-50 small">Deluxe Saloon</div>
+        <div class="track-meta ms-3">
+          <div id="nowPlayingTitle" class="now-playing-title fw-bold text-truncate">Select a Deluxe Track</div>
+          <div id="nowPlayingArtist" class="now-playing-artist text-white-50 small text-truncate">Deluxe Saloon</div>
         </div>
+        <button id="dockFavBtn" class="btn-dock-icon ms-2 d-none d-sm-inline-flex" title="Favorite">
+          <i class="far fa-heart" id="dockFavIcon"></i>
+        </button>
       </div>
       
       <!-- Center: Seek Slider & Playback Controls -->
       <div class="player-controls-wrapper">
         <div class="player-controls">
+          <button id="shuffleBtn" class="btn-player-action" title="Shuffle"><i class="fas fa-shuffle"></i></button>
           <button id="prevBtn" class="btn-player-action" title="Previous Track"><i class="fas fa-step-backward"></i></button>
-          <button id="playPauseBtn" class="btn-player-play" title="Play / Pause"><i class="fas fa-play"></i></button>
+          <button id="playPauseBtn" class="btn-player-play" title="Play / Pause"><i class="fas fa-play" id="mainPlayIcon"></i></button>
           <button id="nextBtn" class="btn-player-action" title="Next Track"><i class="fas fa-step-forward"></i></button>
+          <button id="repeatBtn" class="btn-player-action" title="Repeat"><i class="fas fa-repeat"></i></button>
         </div>
         
         <div class="player-progress">
           <span class="progress-time" id="currentTime">0:00</span>
           <div class="progress-bar-container">
-            <input type="range" id="progressBar" class="progress-bar" min="0" max="100" value="0" aria-label="Seek progress" />
-            <div class="waveform" id="waveform"></div>
+            <input type="range" id="progressBar" class="progress-bar" min="0" max="100" value="0" step="0.1" aria-label="Seek progress" />
+            <div class="progress-fill" id="progressFill"></div>
           </div>
           <span class="progress-time" id="duration">0:00</span>
         </div>
       </div>
       
-      <!-- Right: Extra Utility Tools -->
-      <div class="player-extra">
-        <button id="ytModalBtn" class="btn-extra text-danger" title="Watch YouTube Video Stream"><i class="fab fa-youtube"></i></button>
+      <!-- Right: Volume & Hi-Fi Utility Drawers -->
+      <div class="player-extra d-flex align-items-center gap-2">
+        
+        <!-- Video Stream Toggle -->
+        <button id="ytModalBtn" class="btn-extra text-danger" title="YouTube Video Sync">
+          <i class="fab fa-youtube"></i>
+        </button>
 
-        <div class="volume-wrapper">
-          <button id="volumeBtn" class="btn-extra" title="Mute/Unmute"><i class="fas fa-volume-up"></i></button>
+        <!-- Volume Range -->
+        <div class="volume-wrapper d-none d-md-flex align-items-center">
+          <button id="volumeBtn" class="btn-extra" title="Mute/Unmute"><i class="fas fa-volume-up" id="volIcon"></i></button>
           <input type="range" id="volumeControl" class="volume-control" min="0" max="100" value="80" aria-label="Volume" />
         </div>
 
-        <div class="extra-tools border-start-glass ps-2">
-          <button id="queueBtn" class="btn-extra" title="Up Next Queue"><i class="fas fa-list-ul"></i></button>
+        <!-- Extra Tools Separator -->
+        <div class="extra-tools d-flex align-items-center gap-1 ps-2 border-start-glass">
+          <button id="queueBtn" class="btn-extra position-relative" title="Up Next Queue">
+            <i class="fas fa-list-ul"></i>
+            <span class="badge-dot d-none" id="queueBadgeDot"></span>
+          </button>
           <button id="sleepTimerBtn" class="btn-extra" title="Sleep Timer"><i class="fas fa-moon"></i></button>
           <button id="eqBtn" class="btn-extra" title="Equalizer"><i class="fas fa-sliders-h"></i></button>
         </div>
+
       </div>
 
     </div>
 
-    <!-- YouTube Video Drawer -->
+    <!-- YouTube Video Stream Drawer -->
     <div id="ytVideoDrawer" class="yt-video-drawer glass-drawer">
-      <div class="yt-drawer-header d-flex justify-content-between align-items-center mb-2">
-        <h6 class="m-0 text-white fw-bold"><i class="fab fa-youtube text-danger me-2"></i> YouTube Video Stream</h6>
-        <button id="closeYtDrawer" class="btn-close-drawer"><i class="fas fa-times"></i></button>
+      <div class="drawer-header d-flex justify-content-between align-items-center mb-3">
+        <h6 class="m-0 text-white fw-bold d-flex align-items-center gap-2">
+          <i class="fab fa-youtube text-danger fs-5"></i>
+          <span>Synced Video Stream</span>
+        </h6>
+        <button id="closeYtDrawer" class="btn-close-drawer" aria-label="Close video drawer"><i class="fas fa-times"></i></button>
       </div>
       <div class="yt-iframe-wrapper">
         <div id="ytPlayerContainer"></div>
       </div>
     </div>
 
-    <!-- Queue Panel Drawer -->
+    <!-- Playlist Queue Drawer -->
     <div id="queuePanel" class="queue-panel glass-drawer">
-      <div class="queue-header d-flex justify-content-between align-items-center mb-2">
-        <h5 class="m-0 fw-bold fs-6"><i class="fas fa-list-ul me-2"></i> Playlist Queue</h5>
-        <button id="closeQueue" class="btn-close-drawer"><i class="fas fa-times"></i></button>
+      <div class="drawer-header d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex align-items-center gap-2">
+          <h5 class="m-0 fw-bold fs-6"><i class="fas fa-list-ul text-warning me-2"></i> Playback Queue</h5>
+          <span class="badge bg-dark border border-secondary text-white-50 px-2 py-0" id="queueItemCount">0</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <button id="clearQueueBtn" class="btn btn-sm btn-link text-white-50 text-decoration-none small p-0 me-2">Clear</button>
+          <button id="closeQueue" class="btn-close-drawer" aria-label="Close queue"><i class="fas fa-times"></i></button>
+        </div>
       </div>
       <div class="queue-list" id="queueList"></div>
     </div>
     
-    <!-- Equalizer Panel Drawer -->
+    <!-- 3-Band Equalizer Drawer -->
     <div id="eqPanel" class="eq-panel glass-drawer">
-      <div class="eq-header d-flex justify-content-between align-items-center mb-2">
-        <h5 class="m-0 fw-bold fs-6"><i class="fas fa-sliders-h me-2"></i> Audio Equalizer</h5>
-        <button id="closeEq" class="btn-close-drawer"><i class="fas fa-times"></i></button>
+      <div class="drawer-header d-flex justify-content-between align-items-center mb-3">
+        <h5 class="m-0 fw-bold fs-6"><i class="fas fa-sliders-h text-info me-2"></i> Hi-Fi Equalizer</h5>
+        <button id="closeEq" class="btn-close-drawer" aria-label="Close equalizer"><i class="fas fa-times"></i></button>
       </div>
       <div class="eq-controls my-3">
-        <div class="eq-band mb-2">
-          <div class="d-flex justify-content-between small text-muted mb-1"><span>Bass</span><span id="bassVal">0dB</span></div>
+        <div class="eq-band mb-3">
+          <div class="d-flex justify-content-between small text-white-50 mb-1">
+            <span>Bass (100Hz)</span>
+            <span id="bassVal" class="text-white fw-semibold">0dB</span>
+          </div>
           <input type="range" class="eq-range" min="-12" max="12" value="0" data-band="low" />
         </div>
-        <div class="eq-band mb-2">
-          <div class="d-flex justify-content-between small text-muted mb-1"><span>Mid</span><span id="midVal">0dB</span></div>
+        <div class="eq-band mb-3">
+          <div class="d-flex justify-content-between small text-white-50 mb-1">
+            <span>Mid (1kHz)</span>
+            <span id="midVal" class="text-white fw-semibold">0dB</span>
+          </div>
           <input type="range" class="eq-range" min="-12" max="12" value="0" data-band="mid" />
         </div>
-        <div class="eq-band mb-2">
-          <div class="d-flex justify-content-between small text-muted mb-1"><span>Treble</span><span id="trebleVal">0dB</span></div>
+        <div class="eq-band mb-3">
+          <div class="d-flex justify-content-between small text-white-50 mb-1">
+            <span>Treble (10kHz)</span>
+            <span id="trebleVal" class="text-white fw-semibold">0dB</span>
+          </div>
           <input type="range" class="eq-range" min="-12" max="12" value="0" data-band="high" />
         </div>
       </div>
-      <div class="eq-presets d-flex gap-1">
-        <button class="btn btn-sm btn-preset eq-preset" data-preset="flat">Flat</button>
+      <div class="eq-presets d-flex gap-2">
+        <button class="btn btn-sm btn-preset eq-preset active" data-preset="flat">Flat</button>
+        <button class="btn btn-sm btn-preset eq-preset" data-preset="vinyl">Warm Vinyl</button>
         <button class="btn btn-sm btn-preset eq-preset" data-preset="rock">Rock</button>
         <button class="btn btn-sm btn-preset eq-preset" data-preset="pop">Pop</button>
         <button class="btn btn-sm btn-preset eq-preset" data-preset="jazz">Jazz</button>
       </div>
     </div>
     
-    <!-- Sleep Timer Panel Drawer -->
+    <!-- Sleep Timer Drawer -->
     <div id="sleepTimerPanel" class="sleep-timer-panel glass-drawer">
-      <div class="sleep-timer-header d-flex justify-content-between align-items-center mb-2">
-        <h5 class="m-0 fw-bold fs-6"><i class="fas fa-moon me-2"></i> Sleep Timer</h5>
-        <button id="closeSleepTimer" class="btn-close-drawer"><i class="fas fa-times"></i></button>
+      <div class="drawer-header d-flex justify-content-between align-items-center mb-3">
+        <h5 class="m-0 fw-bold fs-6"><i class="fas fa-moon text-warning me-2"></i> Sleep Timer</h5>
+        <button id="closeSleepTimer" class="btn-close-drawer" aria-label="Close sleep timer"><i class="fas fa-times"></i></button>
       </div>
       <div class="sleep-timer-options d-flex flex-wrap gap-2 my-3">
-        <button class="btn btn-sm btn-preset timer-option" data-minutes="5">5m</button>
-        <button class="btn btn-sm btn-preset timer-option" data-minutes="15">15m</button>
-        <button class="btn btn-sm btn-preset timer-option" data-minutes="30">30m</button>
-        <button class="btn btn-sm btn-preset timer-option" data-minutes="60">60m</button>
+        <button class="btn btn-sm btn-preset timer-option" data-minutes="15">15 min</button>
+        <button class="btn btn-sm btn-preset timer-option" data-minutes="30">30 min</button>
+        <button class="btn btn-sm btn-preset timer-option" data-minutes="45">45 min</button>
+        <button class="btn btn-sm btn-preset timer-option" data-minutes="60">60 min</button>
+        <button class="btn btn-sm btn-preset timer-option text-danger" data-minutes="0">Off</button>
       </div>
       <div class="custom-timer input-group mb-3">
-        <input type="number" id="customTimer" class="form-control custom-input" min="1" max="120" placeholder="Custom mins" />
-        <button id="setCustomTimer" class="btn btn-gradient btn-sm">Set</button>
+        <input type="number" id="customTimer" class="form-control custom-input" min="1" max="180" placeholder="Custom mins" />
+        <button id="setCustomTimer" class="btn btn-gold btn-sm">Set</button>
       </div>
-      <div class="timer-status" id="timerStatus">Timer inactive</div>
+      <div class="timer-status text-white-50 small" id="timerStatus">Timer inactive</div>
     </div>
   </div>
 
-
+  <!-- Track Comments & Liner Notes Modal -->
+  <div class="modal fade" id="commentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content glass-modal border-0">
+        <div class="modal-header border-bottom-glass">
+          <h5 class="modal-title fw-bold" id="commentModalTitle"><i class="far fa-comments me-2 text-warning"></i> Track Liner Notes</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div id="commentsContainer" class="comments-list mb-4"></div>
+          <form id="commentForm">
+            <div class="mb-3">
+              <input type="text" class="form-control custom-input mb-2" id="commentName" placeholder="Your Name or Vinyl Handle" required />
+              <textarea class="form-control custom-input" id="commentText" rows="3" placeholder="Share your liner note or memory of this track..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-gold w-100 py-2">
+              <i class="fas fa-paper-plane me-2"></i> Post Liner Note
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- YouTube Iframe API -->
   <script src="https://www.youtube.com/iframe_api"></script>
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/wavesurfer.js"></script>
+  <!-- Bootstrap 5 Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <!-- Application Logic -->
   <script src="script.js"></script>
 </body>
 </html>
