@@ -61,7 +61,7 @@ body.deluxe-saloon-body {
   background-color: var(--bg-core);
   color: var(--text-primary);
   margin: 0;
-  padding-bottom: 130px;
+  padding-bottom: 160px;
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
