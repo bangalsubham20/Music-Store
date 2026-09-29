@@ -1,0 +1,218 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 280" width="100%" height="280">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a0f" />
+      <stop offset="50%" stop-color="#12131c" />
+      <stop offset="100%" stop-color="#06070a" />
+    </linearGradient>
+
+    <!-- Gold Gradients -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="50%" stop-color="#eab308" />
+      <stop offset="100%" stop-color="#ca8a04" />
+    </linearGradient>
+
+    <linearGradient id="amberGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#d97706" stop-opacity="0.8" />
+      <stop offset="50%" stop-color="#f59e0b" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.8" />
+    </linearGradient>
+
+    <linearGradient id="cyanGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="50%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#fef08a" />
+    </linearGradient>
+
+    <!-- Vinyl Texture & Shimmer -->
+    <radialGradient id="vinylGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#2a2a2a" />
+      <stop offset="25%" stop-color="#111111" />
+      <stop offset="27%" stop-color="#1c1c1c" />
+      <stop offset="55%" stop-color="#0d0d0d" />
+      <stop offset="57%" stop-color="#181818" />
+      <stop offset="85%" stop-color="#0a0a0a" />
+      <stop offset="100%" stop-color="#020202" />
+    </radialGradient>
+
+    <radialGradient id="centerLabel" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ca8a04" />
+      <stop offset="70%" stop-color="#854d0e" />
+      <stop offset="100%" stop-color="#422006" />
+    </radialGradient>
+
+    <!-- Filters -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <style>
+      @keyframes spinVinyl {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      @keyframes pulseGlow {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 0.9; }
+      }
+      @keyframes tonearmFloat {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(1.2deg); }
+      }
+      @keyframes eqBounce1 { 0%, 100% { height: 12px; y: 68px; } 50% { height: 55px; y: 25px; } }
+      @keyframes eqBounce2 { 0%, 100% { height: 42px; y: 38px; } 50% { height: 18px; y: 62px; } }
+      @keyframes eqBounce3 { 0%, 100% { height: 28px; y: 52px; } 50% { height: 62px; y: 18px; } }
+      @keyframes eqBounce4 { 0%, 100% { height: 60px; y: 20px; } 50% { height: 30px; y: 50px; } }
+      @keyframes eqBounce5 { 0%, 100% { height: 18px; y: 62px; } 50% { height: 50px; y: 30px; } }
+      @keyframes eqBounce6 { 0%, 100% { height: 48px; y: 32px; } 50% { height: 15px; y: 65px; } }
+      @keyframes eqBounce7 { 0%, 100% { height: 35px; y: 45px; } 50% { height: 58px; y: 22px; } }
+      @keyframes eqBounce8 { 0%, 100% { height: 52px; y: 28px; } 50% { height: 22px; y: 58px; } }
+      @keyframes badgePulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.15); opacity: 0.7; }
+      }
+
+      .spinning-record {
+        transform-origin: 150px 140px;
+        animation: spinVinyl 3.6s linear infinite;
+      }
+      .tonearm {
+        transform-origin: 290px 45px;
+        animation: tonearmFloat 4s ease-in-out infinite;
+      }
+      .ambient-glow {
+        animation: pulseGlow 3s ease-in-out infinite;
+      }
+      .live-dot {
+        transform-origin: center;
+        animation: badgePulse 1.8s ease-in-out infinite;
+      }
+
+      .bar-1 { animation: eqBounce1 0.7s ease-in-out infinite; }
+      .bar-2 { animation: eqBounce2 0.85s ease-in-out infinite 0.1s; }
+      .bar-3 { animation: eqBounce3 0.65s ease-in-out infinite 0.15s; }
+      .bar-4 { animation: eqBounce4 0.9s ease-in-out infinite 0.05s; }
+      .bar-5 { animation: eqBounce5 0.75s ease-in-out infinite 0.2s; }
+      .bar-6 { animation: eqBounce6 0.8s ease-in-out infinite 0.12s; }
+      .bar-7 { animation: eqBounce7 0.7s ease-in-out infinite 0.25s; }
+      .bar-8 { animation: eqBounce8 0.85s ease-in-out infinite 0.08s; }
+    </style>
+  </defs>
+
+  <!-- Container Box with Rounded Glass Border -->
+  <rect x="4" y="4" width="872" height="272" rx="20" fill="url(#bgGrad)" stroke="#2b2d3d" stroke-width="1.5" />
+  
+  <!-- Subtle Ambient Glow Orbs -->
+  <circle cx="150" cy="140" r="110" fill="#d97706" opacity="0.12" filter="url(#glow)" class="ambient-glow" />
+  <circle cx="680" cy="140" r="140" fill="#0891b2" opacity="0.08" filter="url(#glow)" />
+
+  <!-- ==================== LEFT: VINYL TURNTABLE DECK ==================== -->
+  <!-- Platter Metallic Rim -->
+  <circle cx="150" cy="140" r="114" fill="#1e2029" stroke="#374151" stroke-width="2" />
+  <circle cx="150" cy="140" r="110" fill="#14151c" />
+
+  <!-- Animated Spinning Record Disc -->
+  <g class="spinning-record">
+    <circle cx="150" cy="140" r="105" fill="url(#vinylGrad)" stroke="#111" stroke-width="1" />
+    
+    <!-- Micro Grooves -->
+    <circle cx="150" cy="140" r="98" fill="none" stroke="#252525" stroke-width="0.7" opacity="0.8" />
+    <circle cx="150" cy="140" r="91" fill="none" stroke="#1f1f1f" stroke-width="0.7" opacity="0.9" />
+    <circle cx="150" cy="140" r="82" fill="none" stroke="#282828" stroke-width="0.8" opacity="0.7" />
+    <circle cx="150" cy="140" r="74" fill="none" stroke="#1c1c1c" stroke-width="0.7" opacity="0.8" />
+    <circle cx="150" cy="140" r="65" fill="none" stroke="#262626" stroke-width="0.8" opacity="0.9" />
+    <circle cx="150" cy="140" r="54" fill="none" stroke="#1f1f1f" stroke-width="0.7" opacity="0.8" />
+    <circle cx="150" cy="140" r="44" fill="none" stroke="#2a2a2a" stroke-width="0.7" opacity="0.7" />
+
+    <!-- Vinyl Sheen & Light Reflections -->
+    <path d="M 150 35 A 105 105 0 0 1 224 66 L 150 140 Z" fill="#ffffff" opacity="0.04" />
+    <path d="M 150 245 A 105 105 0 0 1 76 214 L 150 140 Z" fill="#ffffff" opacity="0.04" />
+
+    <!-- Center Label -->
+    <circle cx="150" cy="140" r="34" fill="url(#centerLabel)" stroke="#fef08a" stroke-width="1" />
+    <text x="150" y="132" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="7" font-weight="800" fill="#fef08a" text-anchor="middle" letter-spacing="1.5">DELUXE</text>
+    <text x="150" y="142" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="5.5" font-weight="600" fill="#fed7aa" text-anchor="middle" letter-spacing="1">SALOON</text>
+    <text x="150" y="151" font-family="'JetBrains Mono', monospace" font-size="4.5" fill="#fde047" text-anchor="middle">33 ⅓ RPM</text>
+
+    <!-- Center Spindle Hole -->
+    <circle cx="150" cy="140" r="5" fill="#000000" stroke="#71717a" stroke-width="1" />
+    <circle cx="150" cy="140" r="1.8" fill="#d4d4d8" />
+  </g>
+
+  <!-- Turntable Tonearm Base & Assembly -->
+  <circle cx="282" cy="62" r="16" fill="#1f2430" stroke="#4b5563" stroke-width="1.5" />
+  <circle cx="282" cy="62" r="8" fill="#374151" />
+
+  <!-- Animated Tonearm tracking over the record -->
+  <g class="tonearm">
+    <!-- Counterweight -->
+    <rect x="274" y="38" width="16" height="12" rx="2" fill="#4b5563" stroke="#9ca3af" stroke-width="0.8" />
+    <!-- Arm Rod -->
+    <path d="M 282 62 L 235 110 L 205 135" fill="none" stroke="#d1d5db" stroke-width="3" stroke-linecap="round" />
+    <path d="M 282 62 L 235 110 L 205 135" fill="none" stroke="#9ca3af" stroke-width="1" stroke-linecap="round" />
+    <!-- Headshell & Cartridge Needle -->
+    <polygon points="205,133 194,142 198,147 209,138" fill="#eab308" filter="url(#softGlow)" />
+    <!-- Stylus tip -->
+    <circle cx="195" cy="144" r="1.5" fill="#ffffff" />
+  </g>
+
+  <!-- ==================== RIGHT: BRANDING, STATUS & EQUALIZER ==================== -->
+  <!-- Status Badges Row -->
+  <g transform="translate(340, 36)">
+    <!-- Studio Mark Badge -->
+    <rect x="0" y="0" width="138" height="26" rx="13" fill="#181926" stroke="#2e3146" stroke-width="1" />
+    <circle cx="14" cy="13" r="5" fill="#22c55e" class="live-dot" filter="url(#softGlow)" />
+    <text x="26" y="17" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" fill="#a7f3d0">STUDIO ONLINE</text>
+
+    <!-- Audiophile Master Badge -->
+    <rect x="148" y="0" width="186" height="26" rx="13" fill="#181926" stroke="#eab308" stroke-width="0.8" opacity="0.9" />
+    <text x="162" y="17" font-family="'JetBrains Mono', monospace" font-size="10.5" font-weight="500" fill="#fef08a">✨ 24-BIT / 96kHz HI-FI</text>
+
+    <!-- 90s Vinyl Badge -->
+    <rect x="344" y="0" width="146" height="26" rx="13" fill="#181926" stroke="#06b6d4" stroke-width="0.8" />
+    <text x="358" y="17" font-family="'JetBrains Mono', monospace" font-size="10.5" font-weight="500" fill="#7dd3fc">ANALOG WARMTH</text>
+  </g>
+
+  <!-- Main Hero Title & Tagline -->
+  <text x="340" y="105" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="34" font-weight="800" fill="#ffffff" letter-spacing="1">
+    DELUXE <tspan fill="url(#goldGrad)">SALOON</tspan>
+  </text>
+  <text x="340" y="132" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="14" font-weight="400" fill="#94a3b8" letter-spacing="0.5">
+    Audiophile 90s Vinyl Studio &amp; Tactile Turntable Player
+  </text>
+
+  <!-- Animated Live Frequency Equalizer Bars -->
+  <g transform="translate(340, 160)">
+    <!-- Dark Glass EQ Container -->
+    <rect x="0" y="0" width="490" height="90" rx="12" fill="#11131c" stroke="#25283b" stroke-width="1" />
+
+    <!-- Now Playing Mini Indicator -->
+    <text x="16" y="24" font-family="'JetBrains Mono', monospace" font-size="10.5" font-weight="600" fill="#fef08a" letter-spacing="1">NOW SPINNING</text>
+    <text x="16" y="44" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="13" font-weight="700" fill="#f1f5f9">Smooth Operator — Sade</text>
+    <text x="16" y="63" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="11" fill="#64748b">Diamond Life (1984) • 33 ⅓ RPM Vinyl</text>
+
+    <!-- Animated Equalizer Bars Container -->
+    <g transform="translate(295, 5)">
+      <rect x="0" y="50" width="8" height="30" rx="4" fill="url(#cyanGrad)" class="bar-1" />
+      <rect x="14" y="38" width="8" height="42" rx="4" fill="url(#cyanGrad)" class="bar-2" />
+      <rect x="28" y="52" width="8" height="28" rx="4" fill="url(#cyanGrad)" class="bar-3" />
+      <rect x="42" y="20" width="8" height="60" rx="4" fill="url(#cyanGrad)" class="bar-4" />
+      <rect x="56" y="62" width="8" height="18" rx="4" fill="url(#cyanGrad)" class="bar-5" />
+      <rect x="70" y="32" width="8" height="48" rx="4" fill="url(#cyanGrad)" class="bar-6" />
+      <rect x="84" y="45" width="8" height="35" rx="4" fill="url(#cyanGrad)" class="bar-7" />
+      <rect x="98" y="28" width="8" height="52" rx="4" fill="url(#cyanGrad)" class="bar-8" />
+      <rect x="112" y="38" width="8" height="42" rx="4" fill="url(#cyanGrad)" class="bar-2" />
+      <rect x="126" y="52" width="8" height="28" rx="4" fill="url(#cyanGrad)" class="bar-3" />
+      <rect x="140" y="20" width="8" height="60" rx="4" fill="url(#cyanGrad)" class="bar-4" />
+      <rect x="154" y="45" width="8" height="35" rx="4" fill="url(#cyanGrad)" class="bar-1" />
+      <rect x="168" y="50" width="8" height="30" rx="4" fill="url(#cyanGrad)" class="bar-7" />
+    </g>
+  </g>
+</svg>
